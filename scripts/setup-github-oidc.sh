@@ -11,6 +11,8 @@ GITHUB_WIF_PROVIDER="${GITHUB_WIF_PROVIDER:-savemedia}"
 GITHUB_DEPLOYER_SERVICE_ACCOUNT_NAME="${GITHUB_DEPLOYER_SERVICE_ACCOUNT_NAME:-github-actions-deployer}"
 GITHUB_ENVIRONMENT_NAME="${GITHUB_ENVIRONMENT_NAME:-production}"
 API_KEY_VALUE="${API_KEY_VALUE:-}"
+ATTRIBUTE_MAPPING="google.subject=assertion.sub,attribute.repository=assertion.repository,attribute.repository_id=assertion.repository_id,attribute.repository_owner=assertion.repository_owner,attribute.ref=assertion.ref"
+ATTRIBUTE_CONDITION_TEMPLATE="assertion.repository_id=='%s'"
 
 ensure_gh_auth() {
   if ! run_gh auth status >/dev/null 2>&1; then
@@ -38,19 +40,18 @@ EOF
 }
 
 derive_repo_slug() {
-  local slug
-
-  slug="$(run_gh repo view --json nameWithOwner --jq '.nameWithOwner' 2>/dev/null || true)"
-  if [[ -n "$slug" ]]; then
-    echo "$slug"
-    return 0
-  fi
-
   local remote_url
   remote_url="$(git -C "$ROOT_DIR" remote get-url origin 2>/dev/null || true)"
 
   if [[ "$remote_url" =~ github.com[:/]([^/]+/[^/.]+)(\.git)?$ ]]; then
     echo "${BASH_REMATCH[1]}"
+    return 0
+  fi
+
+  local slug
+  slug="$(run_gh repo view --json nameWithOwner --jq '.nameWithOwner' 2>/dev/null || true)"
+  if [[ -n "$slug" ]]; then
+    echo "$slug"
     return 0
   fi
 
@@ -120,6 +121,7 @@ PROJECT_NUMBER="$(run_gcloud projects describe "$PROJECT_ID" --format='value(pro
 DEPLOYER_SA_EMAIL="${GITHUB_DEPLOYER_SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com"
 WIF_PROVIDER_RESOURCE="projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/${GITHUB_WIF_POOL}/providers/${GITHUB_WIF_PROVIDER}"
 WIF_PRINCIPAL="principalSet://iam.googleapis.com/projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/${GITHUB_WIF_POOL}/attribute.repository_id/${GITHUB_REPOSITORY_ID}"
+ATTRIBUTE_CONDITION="$(printf "$ATTRIBUTE_CONDITION_TEMPLATE" "$GITHUB_REPOSITORY_ID")"
 
 if ! run_gcloud iam service-accounts describe "$DEPLOYER_SA_EMAIL" >/dev/null 2>&1; then
   run_gcloud iam service-accounts create "$GITHUB_DEPLOYER_SERVICE_ACCOUNT_NAME" \
@@ -139,8 +141,15 @@ if ! run_gcloud iam workload-identity-pools providers describe "$GITHUB_WIF_PROV
     --location=global \
     --workload-identity-pool="$GITHUB_WIF_POOL" \
     --issuer-uri="https://token.actions.githubusercontent.com/" \
-    --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository,attribute.repository_id=assertion.repository_id,attribute.repository_owner=assertion.repository_owner,attribute.ref=assertion.ref" \
-    --attribute-condition="assertion.repository_id=='${GITHUB_REPOSITORY_ID}'" >/dev/null
+    --attribute-mapping="$ATTRIBUTE_MAPPING" \
+    --attribute-condition="$ATTRIBUTE_CONDITION" >/dev/null
+else
+  run_gcloud iam workload-identity-pools providers update-oidc "$GITHUB_WIF_PROVIDER" \
+    --location=global \
+    --workload-identity-pool="$GITHUB_WIF_POOL" \
+    --issuer-uri="https://token.actions.githubusercontent.com/" \
+    --attribute-mapping="$ATTRIBUTE_MAPPING" \
+    --attribute-condition="$ATTRIBUTE_CONDITION" >/dev/null
 fi
 
 run_gcloud iam service-accounts add-iam-policy-binding "$DEPLOYER_SA_EMAIL" \
