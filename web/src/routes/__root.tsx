@@ -23,6 +23,11 @@ export const Route = createRootRoute({
     ],
     links: [
       {
+        rel: 'icon',
+        type: 'image/png',
+        href: '/favicon.png',
+      },
+      {
         rel: 'preconnect',
         href: 'https://fonts.googleapis.com',
       },
