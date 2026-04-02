@@ -122,7 +122,7 @@ function DownloaderPage() {
                   className="text-lg font-bold tracking-tight"
                   style={{ fontFamily: "'Poppins', sans-serif" }}
                 >
-                  Save<span className="text-orange-400">Media</span>
+                  iMedia<span className="text-orange-400">Save</span>
                 </span>
               </div>
               <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
