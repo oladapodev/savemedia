@@ -1,6 +1,6 @@
-# SaveMedia Workspace
+# iMediaSave Workspace
 
-SaveMedia is a downloader product built on top of a private media-processing deployment.
+iMediaSave is a downloader product built on top of a private media-processing deployment.
 This repository is organized as a workspace with a branded TanStack Start web app,
 an imported processing API, and a private reference snapshot of the upstream
 Svelte frontend for implementation research only.
@@ -9,14 +9,14 @@ Svelte frontend for implementation research only.
 
 - `api/` - imported processing API
 - `packages/` - imported workspace packages
-- `web/` - the SaveMedia TanStack Start app and public wrapper API
+- `web/` - the iMediaSave TanStack Start app and public wrapper API
 - `docs/` - operational and deployment documentation
 - `cloudrun/` - example Cloud Run service manifests for the web and api services
 - `reference/cobalt-web/` - non-deployed upstream frontend reference
 
 ## Public API surface
 
-The public SaveMedia API is served by the web app:
+The public iMediaSave API is served by the web app:
 
 - `POST /api/preview`
 - `POST /api/download`
@@ -44,7 +44,7 @@ Use these example env files as a starting point:
 
 - `make doctor` - show the resolved Bun, Node, and Docker toolchain
 - `make setup` - install workspace dependencies with Bun
-- `make dev` - start the dockerized processing API and the local SaveMedia web dev server
+- `make dev` - start the dockerized processing API and the local iMediaSave web dev server
 - `make dev-web` - run only the local TanStack frontend
 - `make dev-api` - run only the dockerized processing API
 - `make dev-api-local` - run the processing API directly with Node
@@ -53,7 +53,7 @@ Use these example env files as a starting point:
 - `make check` - run lint and typecheck together
 - `make compose-up` - run the full dockerized web + api stack
 - `make compose-down` - stop the full dockerized stack
-- `make build` - build the SaveMedia web app
+- `make build` - build the iMediaSave web app
 - `make preview-web` - run the built web output
 
 ## GitHub Actions deployment
@@ -76,8 +76,8 @@ The bootstrap uses `gh` to create the repository variables and secrets that the 
 
 Deploy the workspace as two separate Cloud Run services:
 
-- `savemedia-api` using the repo root `Dockerfile`
-- `savemedia-web` using `web/Dockerfile`
+- `imediasave-api` using the repo root `Dockerfile`
+- `imediasave-web` using `web/Dockerfile`
 
 The starter manifests live in:
 
@@ -88,4 +88,4 @@ The starter manifests live in:
 
 - The imported cobalt API code in `api/` remains subject to its upstream AGPL-3.0 terms.
 - The reference frontend in `reference/cobalt-web/` remains subject to cobalt web's upstream license and branding restrictions.
-- SaveMedia does not ship the cobalt Svelte frontend as part of the live product.
+- iMediaSave does not ship the cobalt Svelte frontend as part of the live product.

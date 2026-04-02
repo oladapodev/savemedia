@@ -13,7 +13,7 @@ function errorHtmlPage(title: string, message: string, hint?: string): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Download Error - SaveMedia</title>
+  <title>Download Error - iMediaSave</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f0f; color: #e5e5e5; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 1rem; }
@@ -186,7 +186,7 @@ export const Route = createFileRoute('/api/proxy-download')({
                   : `The media server returned an error (HTTP ${res.status}).`
 
             return new Response(
-              errorHtmlPage(statusTitle, statusMsg, 'Go back to SaveMedia and click "Get Download Link" again to get a fresh link.'),
+              errorHtmlPage(statusTitle, statusMsg, 'Go back to iMediaSave and click "Get Download Link" again to get a fresh link.'),
               { status: 502, headers: { ...CORS_HEADERS, 'Content-Type': 'text/html; charset=utf-8' } },
             )
           }
@@ -199,7 +199,7 @@ export const Route = createFileRoute('/api/proxy-download')({
               errorHtmlPage(
                 'Invalid Download',
                 'The download server returned an error page instead of the media file.',
-                'Go back to SaveMedia and click "Get Download Link" again to get a fresh link.',
+                'Go back to iMediaSave and click "Get Download Link" again to get a fresh link.',
               ),
               { status: 502, headers: { ...CORS_HEADERS, 'Content-Type': 'text/html; charset=utf-8' } },
             )
@@ -260,7 +260,7 @@ export const Route = createFileRoute('/api/proxy-download')({
               isTimeout
                 ? 'The file took too long to download. It may be too large or the server is slow.'
                 : 'An unexpected error occurred while downloading the file.',
-              'Go back to SaveMedia and try again. You can also try a lower quality setting.',
+              'Go back to iMediaSave and try again. You can also try a lower quality setting.',
             ),
             {
               status: isTimeout ? 504 : 500,

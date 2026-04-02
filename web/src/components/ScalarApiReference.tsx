@@ -1,7 +1,7 @@
 import { useEffect, useState, type ComponentType } from 'react'
 import '@scalar/api-reference-react/style.css'
 
-import { saveMediaOpenApiSpec } from '@/lib/savemedia-openapi'
+import { iMediaSaveOpenApiSpec } from '@/lib/imediasave-openapi'
 
 type ScalarReferenceComponent = ComponentType<{
   configuration: {
@@ -40,7 +40,7 @@ export default function ScalarApiReference() {
       <ApiReferenceReact
         configuration={{
           spec: {
-            content: JSON.stringify(saveMediaOpenApiSpec),
+            content: JSON.stringify(iMediaSaveOpenApiSpec),
           },
         }}
       />

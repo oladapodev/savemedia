@@ -30,7 +30,7 @@ jobs:
         run: bun run build
 
       - name: Build API image
-        run: docker build -t savemedia-api:test -f Dockerfile .
+        run: docker build -t imediasave-api:test -f Dockerfile .
 
       - name: Build web image
-        run: docker build -t savemedia-web:test -f web/Dockerfile .
+        run: docker build -t imediasave-web:test -f web/Dockerfile .

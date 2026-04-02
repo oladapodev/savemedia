@@ -1,10 +1,10 @@
 # AGENTS.md
 
-This document describes the current SaveMedia workspace layout for developers and AI agents.
+This document describes the current iMediaSave workspace layout for developers and AI agents.
 
 ## Project Overview
 
-SaveMedia is a branded downloader product built on top of a private cobalt deployment.
+iMediaSave is a branded downloader product built on top of a private cobalt deployment.
 The public product surface is a TanStack Start app in `web/`, while the cobalt API in `api/`
 handles media processing behind the scenes.
 
@@ -18,7 +18,7 @@ handles media processing behind the scenes.
 ├── packages/               # Upstream cobalt workspace packages
 ├── reference/
 │   └── cobalt-web/         # Private reference snapshot of cobalt's Svelte frontend
-├── web/                    # SaveMedia TanStack Start app and public wrapper API
+├── web/                    # iMediaSave TanStack Start app and public wrapper API
 │   ├── public/             # Public assets for the web app
 │   ├── src/
 │   │   ├── components/     # UI components, including the downloader and API docs embed
@@ -40,27 +40,27 @@ handles media processing behind the scenes.
 
 ## Public Interfaces
 
-SaveMedia exposes these public routes from the `web/` app:
+iMediaSave exposes these public routes from the `web/` app:
 
 - `POST /api/preview`
 - `POST /api/download`
 - `GET /api/proxy-download`
 - `GET /docs/api`
 
-The public API is SaveMedia-branded and wrapper-based. Browsers should not call the cobalt API directly.
+The public API is iMediaSave-branded and wrapper-based. Browsers should not call the cobalt API directly.
 
 ## Internal Integration
 
 - `web/src/routes/api.download.ts` calls cobalt through `COBALT_API_URL`.
-- `COBALT_API_KEY` is intended for server-to-server authentication from SaveMedia to cobalt.
+- `COBALT_API_KEY` is intended for server-to-server authentication from iMediaSave to cobalt.
 - `api/` remains the upstream cobalt codebase with minimal local changes.
 
 ## Deployment Model
 
 Deploy as two Cloud Run services:
 
-- `savemedia-api` built from the repo root `Dockerfile`
-- `savemedia-web` built from `web/Dockerfile`
+- `imediasave-api` built from the repo root `Dockerfile`
+- `imediasave-web` built from `web/Dockerfile`
 
 Starter manifests live in `cloudrun/`.
 
@@ -72,7 +72,7 @@ Starter manifests live in `cloudrun/`.
 
 ## Conventions
 
-- Keep SaveMedia-specific product logic in `web/`.
+- Keep iMediaSave-specific product logic in `web/`.
 - Treat `reference/cobalt-web/` as non-deployed reference material only.
 - Preserve upstream licensing and branding restrictions for imported cobalt code.
-- Prefer updating the public SaveMedia wrapper API and docs together so `/docs/api` stays accurate.
+- Prefer updating the public iMediaSave wrapper API and docs together so `/docs/api` stays accurate.

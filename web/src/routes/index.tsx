@@ -217,7 +217,7 @@ function HomePage() {
           className="text-2xl font-bold text-gray-900 text-center mb-12"
           style={{ fontFamily: "'Poppins', sans-serif" }}
         >
-          Why SaveMedia?
+          Why iMediaSave?
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((f) => (
@@ -318,7 +318,7 @@ function HomePage() {
           {/* Bottom Bar */}
           <div className="border-t border-gray-800 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-gray-500 text-xs">
-              &copy; {new Date().getFullYear()} SaveMedia. Download responsibly and respect content creators' rights.
+              &copy; {new Date().getFullYear()} iMediaSave. Download responsibly and respect content creators' rights.
             </p>
             <p className="flex items-center gap-1.5 text-xs text-gray-500">
               Built with <Heart className="w-3.5 h-3.5 text-orange-500 fill-orange-500" /> by

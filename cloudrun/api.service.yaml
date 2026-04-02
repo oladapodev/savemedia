@@ -1,7 +1,7 @@
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: savemedia-api
+  name: imediasave-api
 spec:
   template:
     metadata:
@@ -12,7 +12,7 @@ spec:
       containerConcurrency: 2
       timeoutSeconds: 900
       containers:
-        - image: REGION-docker.pkg.dev/PROJECT_ID/savemedia/api:latest
+        - image: REGION-docker.pkg.dev/PROJECT_ID/imediasave/api:latest
           ports:
             - containerPort: 8080
           env:
@@ -27,21 +27,21 @@ spec:
             - name: API_AUTH_REQUIRED
               value: "1"
             - name: API_KEY_URL
-              value: file:///var/run/secrets/savemedia/keys.json
+              value: file:///var/run/secrets/imediasave/keys.json
             - name: COOKIE_PATH
-              value: /var/run/secrets/savemedia/cookies.json
+              value: /var/run/secrets/imediasave/cookies.json
           resources:
             limits:
               cpu: "2"
               memory: 4Gi
           volumeMounts:
-            - name: savemedia-secrets
-              mountPath: /var/run/secrets/savemedia
+            - name: imediasave-secrets
+              mountPath: /var/run/secrets/imediasave
               readOnly: true
       volumes:
-        - name: savemedia-secrets
+        - name: imediasave-secrets
           secret:
-            secretName: savemedia-cobalt-runtime
+            secretName: imediasave-cobalt-runtime
             items:
               - key: keys.json
                 path: keys.json

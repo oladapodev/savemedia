@@ -23,7 +23,7 @@ async function fetchOEmbed(url: string, platform: string) {
     const timeout = setTimeout(() => controller.abort(), 8000)
     const oembedUrl = `${endpoint}?url=${encodeURIComponent(url)}&format=json`
     const res = await fetch(oembedUrl, {
-      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SaveMedia/1.0)' },
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; iMediaSave/1.0)' },
       signal: controller.signal,
     })
     clearTimeout(timeout)
@@ -43,7 +43,7 @@ async function fetchOEmbedProxy(url: string) {
       const controller = new AbortController()
       const timeout = setTimeout(() => controller.abort(), 6000)
       const res = await fetch(`${proxy}?url=${encodeURIComponent(url)}&format=json`, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; SaveMedia/1.0)' },
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; iMediaSave/1.0)' },
         signal: controller.signal,
       })
       clearTimeout(timeout)

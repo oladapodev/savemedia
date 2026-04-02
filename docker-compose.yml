@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: savemedia-api-dev
+    container_name: imediasave-api-dev
     environment:
       API_URL: http://localhost:9000/
       API_PORT: "9000"
@@ -17,7 +17,7 @@ services:
     build:
       context: .
       dockerfile: web/Dockerfile
-    container_name: savemedia-web-dev
+    container_name: imediasave-web-dev
     depends_on:
       - api
     environment:

@@ -14,7 +14,7 @@ export const Route = createRootRoute({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'SaveMedia — HD Video & Image Downloader',
+        title: 'iMediaSave — HD Video & Image Downloader',
       },
       {
         name: 'description',

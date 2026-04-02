@@ -77,7 +77,7 @@ function getDownloadHint(message: string): string | undefined {
   }
 
   if (normalized.includes('login')) {
-    return 'This piece of content currently requires account access on the source platform and cannot be downloaded through SaveMedia.'
+    return 'This piece of content currently requires account access on the source platform and cannot be downloaded through iMediaSave.'
   }
 
   if (normalized.includes('rate')) {
@@ -183,7 +183,7 @@ export const Route = createFileRoute('/api/download')({
               {
                 error: 'The internal download processor is temporarily unavailable.',
                 platform,
-                hint: 'SaveMedia could not authenticate with the private media service. Please check the server configuration.',
+                hint: 'iMediaSave could not authenticate with the private media service. Please check the server configuration.',
               },
               { status: 502 },
             )
@@ -232,7 +232,7 @@ export const Route = createFileRoute('/api/download')({
           if (data.status === 'local-processing') {
             return Response.json(
               {
-                error: 'This media requires additional local processing and is not supported by the current SaveMedia flow.',
+                error: 'This media requires additional local processing and is not supported by the current iMediaSave flow.',
                 platform,
                 hint: 'Try a different quality or media type. Support for this processing mode can be added later if needed.',
               },

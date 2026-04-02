@@ -29,7 +29,7 @@ fi
 cat >"$WORK_DIR/api-keys.json" <<EOF
 {
   "${API_KEY_VALUE}": {
-    "name": "savemedia-web",
+    "name": "imediasave-web",
     "limit": "unlimited",
     "allowedServices": "all"
   }
@@ -41,8 +41,8 @@ printf '%s' "$API_KEY_VALUE" >"$WORK_DIR/web-api-key.txt"
 upsert_secret "$API_KEYS_SECRET_NAME" "$WORK_DIR/api-keys.json"
 upsert_secret "$WEB_API_KEY_SECRET_NAME" "$WORK_DIR/web-api-key.txt"
 
-if [[ -n "${SAVEMEDIA_COOKIES_JSON:-}" ]]; then
-  printf '%s' "$SAVEMEDIA_COOKIES_JSON" >"$WORK_DIR/cookies.json"
+if [[ -n "${IMEDIASAVE_COOKIES_JSON:-}" ]]; then
+  printf '%s' "$IMEDIASAVE_COOKIES_JSON" >"$WORK_DIR/cookies.json"
   upsert_secret "$API_COOKIES_SECRET_NAME" "$WORK_DIR/cookies.json"
 fi
 
