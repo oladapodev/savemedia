@@ -2,15 +2,15 @@
 
 This repo is set up for two-service deployment on Google Cloud Run:
 
-- `savemedia-api` runs the private cobalt processing service from the workspace root `Dockerfile`.
-- `savemedia-web` runs the TanStack Start app from `web/Dockerfile`.
+- `imediasave-api` runs the private cobalt processing service from the workspace root `Dockerfile`.
+- `imediasave-web` runs the TanStack Start app from `web/Dockerfile`.
 
 ## Expected secrets
 
-- `savemedia-cobalt-runtime`
+- `imediasave-cobalt-runtime`
   - `keys.json`
   - `cookies.json`
-- `savemedia-web-config`
+- `imediasave-web-config`
   - `cobalt-api-key`
 
 ## Recommended flow
@@ -28,6 +28,6 @@ This repo is set up for two-service deployment on Google Cloud Run:
 
 ## Notes
 
-- The web service only exposes the SaveMedia wrapper API.
+- The web service only exposes the iMediaSave wrapper API.
 - The cobalt API remains an internal/private processing layer and should not be used directly by browsers.
 - The API service is configured with lower concurrency and higher memory because media processing is much heavier than serving the web UI.

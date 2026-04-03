@@ -11,16 +11,16 @@ permissions:
   id-token: write
 
 env:
-  PROJECT_ID: ${{ vars.GCP_PROJECT_ID || 'savemedia' }}
+  PROJECT_ID: ${{ vars.GCP_PROJECT_ID || 'imediasave' }}
   REGION: ${{ vars.GCP_REGION || 'us-central1' }}
-  ARTIFACT_REPO: ${{ vars.GCP_ARTIFACT_REPO || 'savemedia' }}
+  ARTIFACT_REPO: ${{ vars.GCP_ARTIFACT_REPO || 'imediasave' }}
   API_IMAGE_NAME: ${{ vars.GCP_API_IMAGE_NAME || 'api' }}
   WEB_IMAGE_NAME: ${{ vars.GCP_WEB_IMAGE_NAME || 'web' }}
-  API_SERVICE_NAME: ${{ vars.GCP_API_SERVICE_NAME || 'savemedia-api' }}
-  WEB_SERVICE_NAME: ${{ vars.GCP_WEB_SERVICE_NAME || 'savemedia-web' }}
-  API_KEYS_SECRET_NAME: ${{ vars.GCP_API_KEYS_SECRET_NAME || 'savemedia-api-keys' }}
-  WEB_API_KEY_SECRET_NAME: ${{ vars.GCP_WEB_API_KEY_SECRET_NAME || 'savemedia-web-api-key' }}
-  API_COOKIES_SECRET_NAME: ${{ vars.GCP_API_COOKIES_SECRET_NAME || 'savemedia-api-cookies' }}
+  API_SERVICE_NAME: ${{ vars.GCP_API_SERVICE_NAME || 'imediasave-api' }}
+  WEB_SERVICE_NAME: ${{ vars.GCP_WEB_SERVICE_NAME || 'imediasave-web' }}
+  API_KEYS_SECRET_NAME: ${{ vars.GCP_API_KEYS_SECRET_NAME || 'imediasave-api-keys' }}
+  WEB_API_KEY_SECRET_NAME: ${{ vars.GCP_WEB_API_KEY_SECRET_NAME || 'imediasave-web-api-key' }}
+  API_COOKIES_SECRET_NAME: ${{ vars.GCP_API_COOKIES_SECRET_NAME || 'imediasave-api-cookies' }}
 
 jobs:
   deploy:
@@ -83,8 +83,8 @@ jobs:
 
       - name: Sync Cloud Run secrets
         env:
-          API_KEY_VALUE: ${{ secrets.SAVEMEDIA_API_SHARED_KEY }}
-          SAVEMEDIA_COOKIES_JSON: ${{ secrets.SAVEMEDIA_COOKIES_JSON }}
+          API_KEY_VALUE: ${{ secrets.IMEDIASAVE_API_SHARED_KEY }}
+          IMEDIASAVE_COOKIES_JSON: ${{ secrets.IMEDIASAVE_COOKIES_JSON }}
         run: ./scripts/setup-cloudrun-secrets.sh
 
       - name: Deploy API service

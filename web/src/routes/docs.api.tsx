@@ -8,12 +8,12 @@ export const Route = createFileRoute('/docs/api')({
   head: () => ({
     meta: [
       {
-        title: 'SaveMedia API Docs',
+        title: 'iMediaSave API Docs',
       },
       {
         name: 'description',
         content:
-          'Interactive API documentation for the SaveMedia wrapper API, including preview, download, and proxy endpoints.',
+          'Interactive API documentation for the iMediaSave wrapper API, including preview, download, and proxy endpoints.',
       },
     ],
   }),
@@ -23,7 +23,7 @@ const callouts = [
   {
     icon: <Sparkles className="h-4 w-4 text-orange-500" />,
     title: 'Public Wrapper API',
-    copy: 'These endpoints are the stable SaveMedia contract. Clients should integrate with SaveMedia routes and not depend on private backend implementation details.',
+    copy: 'These endpoints are the stable iMediaSave contract. Clients should integrate with iMediaSave routes and not depend on private backend implementation details.',
   },
   {
     icon: <Lock className="h-4 w-4 text-emerald-500" />,
@@ -44,18 +44,18 @@ function ApiDocsPage() {
         <div className="mb-8 rounded-[32px] border border-orange-100 bg-white/90 p-6 shadow-xl shadow-orange-500/5 backdrop-blur sm:p-8">
           <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-orange-200 bg-orange-50 px-3 py-1.5 text-xs font-medium text-orange-600">
             <BookOpen className="h-3.5 w-3.5" />
-            SaveMedia Developer Docs
+            iMediaSave Developer Docs
           </div>
 
           <h1
             className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl"
             style={{ fontFamily: "'Poppins', sans-serif" }}
           >
-            API docs for the <span className="text-orange-500">SaveMedia</span> wrapper API
+            API docs for the <span className="text-orange-500">iMediaSave</span> wrapper API
           </h1>
 
           <p className="mt-4 max-w-3xl text-sm leading-6 text-gray-500 sm:text-base">
-            Use the public SaveMedia endpoints to preview supported media, request download links, and proxy file downloads.
+            Use the public iMediaSave endpoints to preview supported media, request download links, and proxy file downloads.
             The API reference below documents the wrapper routes your clients should depend on, while backend processing stays
             private behind the scenes.
           </p>

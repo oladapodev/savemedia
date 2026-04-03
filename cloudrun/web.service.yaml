@@ -1,7 +1,7 @@
 apiVersion: serving.knative.dev/v1
 kind: Service
 metadata:
-  name: savemedia-web
+  name: imediasave-web
 spec:
   template:
     metadata:
@@ -11,7 +11,7 @@ spec:
       containerConcurrency: 40
       timeoutSeconds: 900
       containers:
-        - image: REGION-docker.pkg.dev/PROJECT_ID/savemedia/web:latest
+        - image: REGION-docker.pkg.dev/PROJECT_ID/imediasave/web:latest
           ports:
             - containerPort: 8080
           env:
@@ -24,7 +24,7 @@ spec:
             - name: COBALT_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: savemedia-web-config
+                  name: imediasave-web-config
                   key: cobalt-api-key
           resources:
             limits:

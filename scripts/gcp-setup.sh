@@ -23,7 +23,7 @@ if ! run_gcloud artifacts repositories describe "$ARTIFACT_REPO" --location="$RE
   run_gcloud artifacts repositories create "$ARTIFACT_REPO" \
     --repository-format=docker \
     --location="$REGION" \
-    --description="Savemedia Docker images"
+    --description="iMediaSave Docker images"
 fi
 
 echo "Project: $PROJECT_ID"

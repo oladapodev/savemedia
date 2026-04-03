@@ -5,8 +5,8 @@ Workload Identity Federation instead of a long-lived Google Cloud JSON key.
 
 ## What gets deployed
 
-- `savemedia-api` from the root `Dockerfile`
-- `savemedia-web` from `web/Dockerfile`
+- `imediasave-api` from the root `Dockerfile`
+- `imediasave-web` from `web/Dockerfile`
 
 ## Workflows
 
@@ -26,15 +26,15 @@ Workload Identity Federation instead of a long-lived Google Cloud JSON key.
 ## Required GitHub secrets
 
 - `GCP_WORKLOAD_IDENTITY_PROVIDER`
-  - example: `projects/123456789/locations/global/workloadIdentityPools/github-actions/providers/savemedia`
+  - example: `projects/123456789/locations/global/workloadIdentityPools/github-actions/providers/imediasave`
 - `GCP_SERVICE_ACCOUNT`
-  - example: `github-actions-deployer@savemedia.iam.gserviceaccount.com`
-- `SAVEMEDIA_API_SHARED_KEY`
+  - example: `github-actions-deployer@imediasave.iam.gserviceaccount.com`
+- `IMEDIASAVE_API_SHARED_KEY`
   - a UUID used as the server-to-server API key between the web app and the processing API
 
 ## Optional GitHub secrets
 
-- `SAVEMEDIA_COOKIES_JSON`
+- `IMEDIASAVE_COOKIES_JSON`
   - raw JSON contents for platform cookies if you need authenticated source fetches
 
 ## Bootstrap the Google Cloud side

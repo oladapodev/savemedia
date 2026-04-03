@@ -1,15 +1,15 @@
-export const saveMediaOpenApiSpec = {
+export const iMediaSaveOpenApiSpec = {
   openapi: '3.1.0',
   info: {
-    title: 'SaveMedia Public API',
+    title: 'iMediaSave Public API',
     version: '1.0.0',
     description:
-      'SaveMedia exposes a branded wrapper API for previewing social media content, generating download links, and proxying file downloads.',
+      'iMediaSave exposes a branded wrapper API for previewing social media content, generating download links, and proxying file downloads.',
   },
   servers: [
     {
       url: '/',
-      description: 'Current SaveMedia deployment',
+      description: 'Current iMediaSave deployment',
     },
   ],
   tags: [
@@ -24,7 +24,7 @@ export const saveMediaOpenApiSpec = {
         tags: ['Downloads'],
         summary: 'Preview a supported public post or video',
         description:
-          'Returns best-effort metadata used by the SaveMedia web interface before a download is requested.',
+          'Returns best-effort metadata used by the iMediaSave web interface before a download is requested.',
         requestBody: {
           required: true,
           content: {
@@ -93,7 +93,7 @@ export const saveMediaOpenApiSpec = {
     '/api/download': {
       post: {
         tags: ['Downloads'],
-        summary: 'Resolve a SaveMedia download result',
+        summary: 'Resolve an iMediaSave download result',
         description:
           'Turns a supported public URL into either a single download link or a multi-item picker response.',
         requestBody: {
