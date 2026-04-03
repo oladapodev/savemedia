@@ -11,7 +11,6 @@ import {
   Twitter,
   Facebook,
   Download,
-  Heart,
 } from 'lucide-react'
 import DownloaderCard from '@/components/DownloaderCard'
 
@@ -174,12 +173,6 @@ function DownloaderPage() {
           <div className="border-t border-gray-800 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <p className="text-gray-500 text-xs">
               &copy; {new Date().getFullYear()} SaveMedia. Download responsibly and respect content creators' rights.
-            </p>
-            <p className="flex items-center gap-1.5 text-xs text-gray-500">
-              Built with <Heart className="w-3.5 h-3.5 text-orange-500 fill-orange-500" /> by
-              <span className="font-semibold text-orange-400" style={{ fontFamily: "'Poppins', sans-serif" }}>
-                MayowaCNC
-              </span>
             </p>
           </div>
         </div>
