@@ -6,16 +6,16 @@ export interface SupportedPlatform {
 }
 
 export const SUPPORTED_PLATFORMS: SupportedPlatform[] = [
-  { id: 'bilibili', name: 'Bilibili', hosts: ['bilibili.com', 'bilibili.tv'], color: 'from-sky-400 to-cyan-500' },
+  { id: 'bilibili', name: 'Bilibili', hosts: ['bilibili.com', 'bilibili.tv', 'b23.tv'], color: 'from-sky-400 to-cyan-500' },
   { id: 'bsky', name: 'Bluesky', hosts: ['bsky.app'], color: 'from-sky-500 to-blue-600' },
-  { id: 'dailymotion', name: 'Dailymotion', hosts: ['dailymotion.com'], color: 'from-indigo-500 to-blue-600' },
+  { id: 'dailymotion', name: 'Dailymotion', hosts: ['dailymotion.com', 'dai.ly'], color: 'from-indigo-500 to-blue-600' },
   { id: 'facebook', name: 'Facebook', hosts: ['facebook.com', 'fb.watch'], color: 'from-blue-600 to-blue-700' },
   { id: 'instagram', name: 'Instagram', hosts: ['instagram.com', 'instagr.am', 'ddinstagram.com'], color: 'from-purple-600 via-pink-500 to-orange-400' },
   { id: 'loom', name: 'Loom', hosts: ['loom.com'], color: 'from-violet-500 to-fuchsia-600' },
   { id: 'newgrounds', name: 'Newgrounds', hosts: ['newgrounds.com'], color: 'from-amber-500 to-orange-600' },
   { id: 'ok', name: 'OK.ru', hosts: ['ok.ru'], color: 'from-orange-500 to-amber-500' },
   { id: 'pinterest', name: 'Pinterest', hosts: ['pinterest.com', 'pin.it'], color: 'from-red-500 to-rose-600' },
-  { id: 'reddit', name: 'Reddit', hosts: ['reddit.com'], color: 'from-orange-500 to-red-500' },
+  { id: 'reddit', name: 'Reddit', hosts: ['reddit.com', 'v.redd.it'], color: 'from-orange-500 to-red-500' },
   { id: 'rutube', name: 'Rutube', hosts: ['rutube.ru'], color: 'from-emerald-500 to-green-600' },
   { id: 'snapchat', name: 'Snapchat', hosts: ['snapchat.com', 'snap.com'], color: 'from-yellow-400 to-yellow-500' },
   { id: 'soundcloud', name: 'SoundCloud', hosts: ['soundcloud.com'], color: 'from-orange-500 to-orange-600' },
