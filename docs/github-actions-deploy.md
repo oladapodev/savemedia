@@ -70,6 +70,15 @@ The deploy workflow reads these repository variables:
 - `GCP_WEB_API_KEY_SECRET_NAME`
 - `GCP_API_COOKIES_SECRET_NAME`
 
+Optional repository variables for custom domains:
+
+- `API_PUBLIC_URL`
+  - example: `https://api.isavemedia.com/`
+- `WEB_PUBLIC_URL`
+  - example: `https://isavemedia.com`
+
+If you use custom domains and disable the default Cloud Run URLs, set both variables so the deploy workflow uses your public domains during the initial service deploy and skips the post-deploy URL rewrite step.
+
 ## Manual deploy
 
 You can still deploy from your machine after the bootstrap:

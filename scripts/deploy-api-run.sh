@@ -6,7 +6,10 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/common.sh"
 
 "$ROOT_DIR/scripts/setup-cloudrun-secrets.sh"
 
-WEB_PUBLIC_URL="${WEB_PUBLIC_URL:-https://placeholder.invalid}"
+WEB_PUBLIC_URL="$(normalize_origin_url "$WEB_PUBLIC_URL")"
+API_PUBLIC_URL="$(normalize_api_url "$API_PUBLIC_URL")"
+API_DEPLOY_URL="${API_PUBLIC_URL:-https://placeholder.invalid/}"
+WEB_CORS_URL="${WEB_PUBLIC_URL:-https://placeholder.invalid}"
 COOKIE_ENV_VARS=""
 COOKIE_SECRET_FLAGS=""
 
@@ -25,9 +28,12 @@ run_gcloud run deploy "$API_SERVICE_NAME" \
   --memory=4Gi \
   --concurrency=2 \
   --timeout=900 \
-  --set-env-vars="API_URL=https://placeholder.invalid/,API_PORT=9000,CORS_WILDCARD=0,CORS_URL=${WEB_PUBLIC_URL},API_AUTH_REQUIRED=1,API_KEY_URL=file:///var/run/secrets/imediasave/keys.json${COOKIE_ENV_VARS}" \
+  --set-env-vars="API_URL=${API_DEPLOY_URL},API_PORT=9000,CORS_WILDCARD=0,CORS_URL=${WEB_CORS_URL},API_AUTH_REQUIRED=1,API_KEY_URL=file:///var/run/secrets/imediasave/keys.json${COOKIE_ENV_VARS}" \
   --set-secrets="/var/run/secrets/imediasave/keys.json=${API_KEYS_SECRET_NAME}:latest${COOKIE_SECRET_FLAGS}"
 
-API_PUBLIC_URL="$(run_gcloud run services describe "$API_SERVICE_NAME" --region="$REGION" --format='value(status.url)')"
+if [[ -z "$API_PUBLIC_URL" ]]; then
+  API_PUBLIC_URL="$(run_gcloud run services describe "$API_SERVICE_NAME" --region="$REGION" --format='value(status.url)')"
+  API_PUBLIC_URL="$(normalize_api_url "$API_PUBLIC_URL")"
+fi
 
 echo "API service URL: ${API_PUBLIC_URL}"

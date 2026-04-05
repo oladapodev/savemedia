@@ -29,6 +29,8 @@ WEB_SERVICE_NAME="${WEB_SERVICE_NAME:-imediasave-web}"
 API_KEYS_SECRET_NAME="${API_KEYS_SECRET_NAME:-imediasave-api-keys}"
 WEB_API_KEY_SECRET_NAME="${WEB_API_KEY_SECRET_NAME:-imediasave-web-api-key}"
 API_COOKIES_SECRET_NAME="${API_COOKIES_SECRET_NAME:-imediasave-api-cookies}"
+API_PUBLIC_URL="${API_PUBLIC_URL:-}"
+WEB_PUBLIC_URL="${WEB_PUBLIC_URL:-}"
 
 export PATH="$NODE_DIR:$PATH"
 
@@ -87,4 +89,23 @@ runtime_service_account() {
   local project_number
   project_number="$(run_gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')"
   echo "${project_number}-compute@developer.gserviceaccount.com"
+}
+
+normalize_origin_url() {
+  local value="${1:-}"
+  if [[ -z "$value" ]]; then
+    return 0
+  fi
+
+  printf '%s' "${value%/}"
+}
+
+normalize_api_url() {
+  local value
+  value="$(normalize_origin_url "${1:-}")"
+  if [[ -z "$value" ]]; then
+    return 0
+  fi
+
+  printf '%s/' "$value"
 }

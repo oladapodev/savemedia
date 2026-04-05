@@ -21,6 +21,8 @@ env:
   API_KEYS_SECRET_NAME: ${{ vars.GCP_API_KEYS_SECRET_NAME || 'imediasave-api-keys' }}
   WEB_API_KEY_SECRET_NAME: ${{ vars.GCP_WEB_API_KEY_SECRET_NAME || 'imediasave-web-api-key' }}
   API_COOKIES_SECRET_NAME: ${{ vars.GCP_API_COOKIES_SECRET_NAME || 'imediasave-api-cookies' }}
+  API_PUBLIC_URL: ${{ vars.API_PUBLIC_URL || '' }}
+  WEB_PUBLIC_URL: ${{ vars.WEB_PUBLIC_URL || '' }}
 
 jobs:
   deploy:
