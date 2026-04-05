@@ -18,6 +18,12 @@ import {
   User,
   RefreshCw,
 } from 'lucide-react'
+import {
+  detectPlatform,
+  PLATFORM_COLORS,
+  PLATFORM_NAMES,
+  SUPPORTED_PLATFORM_COPY,
+} from '@/lib/platforms'
 
 type Quality = '2160' | '1080' | '720' | '480' | '360' | 'audio'
 type Status = 'idle' | 'previewing' | 'preview' | 'fetching' | 'ready' | 'downloading' | 'success' | 'error'
@@ -61,42 +67,6 @@ const QUALITY_OPTIONS: { value: Quality; label: string; tag?: string }[] = [
   { value: 'audio', label: 'Audio', tag: 'MP3' },
 ]
 
-const PLATFORM_COLORS: Record<string, string> = {
-  tiktok: 'from-[#ff0050] to-[#00f2ea]',
-  instagram: 'from-purple-600 via-pink-500 to-orange-400',
-  snapchat: 'from-yellow-400 to-yellow-500',
-  youtube: 'from-red-600 to-red-500',
-  twitter: 'from-blue-400 to-blue-600',
-  facebook: 'from-blue-600 to-blue-700',
-  pinterest: 'from-red-500 to-red-600',
-}
-
-const PLATFORM_NAMES: Record<string, string> = {
-  tiktok: 'TikTok',
-  instagram: 'Instagram',
-  snapchat: 'Snapchat',
-  youtube: 'YouTube',
-  twitter: 'X / Twitter',
-  facebook: 'Facebook',
-  pinterest: 'Pinterest',
-}
-
-function detectPlatform(url: string): string | null {
-  try {
-    const host = new URL(url).hostname.toLowerCase()
-    if (host.includes('tiktok.com') || host.includes('vm.tiktok.com')) return 'tiktok'
-    if (host.includes('instagram.com') || host.includes('instagr.am')) return 'instagram'
-    if (host.includes('snapchat.com') || host.includes('snap.com')) return 'snapchat'
-    if (host.includes('youtube.com') || host.includes('youtu.be')) return 'youtube'
-    if (host.includes('twitter.com') || host.includes('x.com')) return 'twitter'
-    if (host.includes('facebook.com') || host.includes('fb.watch')) return 'facebook'
-    if (host.includes('pinterest.com') || host.includes('pin.it')) return 'pinterest'
-    return null
-  } catch {
-    return null
-  }
-}
-
 export default function DownloaderCard() {
   const [url, setUrl] = useState('')
   const [quality, setQuality] = useState<Quality>('1080')
@@ -135,7 +105,7 @@ export default function DownloaderCard() {
 
     if (!detectedPlatform) {
       setStatus('error')
-      setMessage('Unsupported URL. Try links from TikTok, Instagram, Snapchat, YouTube, Twitter, Facebook, or Pinterest.')
+      setMessage(`Unsupported URL. Try links from: ${SUPPORTED_PLATFORM_COPY}.`)
       return
     }
 

@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   Heart,
 } from 'lucide-react'
+import { SUPPORTED_PLATFORMS } from '@/lib/platforms'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
@@ -80,11 +81,13 @@ const features = [
   },
   {
     icon: <Globe className="w-5 h-5" />,
-    title: '7+ Platforms',
-    desc: 'TikTok, Instagram, YouTube, Snapchat, Twitter, Facebook & more',
+    title: `${SUPPORTED_PLATFORMS.length}+ Platforms`,
+    desc: 'TikTok, Instagram, YouTube, Snapchat, Reddit, SoundCloud, Vimeo, Twitch and more',
     color: 'text-blue-500',
   },
 ]
+
+const footerPlatformNames = SUPPORTED_PLATFORMS.map((platform) => platform.name)
 
 function HomePage() {
   return (
@@ -116,7 +119,7 @@ function HomePage() {
           </h1>
 
           <p className="text-lg text-gray-500 mb-10 max-w-xl mx-auto leading-relaxed">
-            Paste any link from TikTok, Instagram, YouTube, or Snapchat.
+            Paste any link from TikTok, Instagram, YouTube, Snapchat, Reddit, SoundCloud, Vimeo, Twitch, and more.
             Preview the content, choose quality, and download instantly.
           </p>
 
@@ -306,7 +309,7 @@ function HomePage() {
                 Platforms
               </h3>
               <div className="flex flex-wrap gap-2">
-                {['TikTok', 'Instagram', 'YouTube', 'Snapchat', 'Twitter', 'Facebook'].map((p) => (
+                {footerPlatformNames.map((p) => (
                   <span key={p} className="px-3 py-1 text-xs rounded-full bg-gray-800 text-gray-400 border border-gray-700">
                     {p}
                   </span>

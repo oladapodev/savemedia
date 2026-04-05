@@ -14,6 +14,7 @@ import {
   Heart,
 } from 'lucide-react'
 import DownloaderCard from '@/components/DownloaderCard'
+import { SUPPORTED_PLATFORMS } from '@/lib/platforms'
 
 export const Route = createFileRoute('/downloader')({
   component: DownloaderPage,
@@ -27,6 +28,8 @@ const supportedPlatforms = [
   { name: 'Twitter/X', icon: <Twitter className="w-4 h-4" />, color: 'from-blue-400 to-blue-600' },
   { name: 'Facebook', icon: <Facebook className="w-4 h-4" />, color: 'from-blue-600 to-blue-700' },
 ]
+
+const allPlatformNames = SUPPORTED_PLATFORMS.map((platform) => platform.name)
 
 function DownloaderPage() {
   return (
@@ -42,7 +45,7 @@ function DownloaderPage() {
         <div className="relative max-w-3xl mx-auto px-4 pt-10 pb-6 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-xs font-medium text-orange-600 mb-5">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            All platforms supported • HD quality
+            {SUPPORTED_PLATFORMS.length}+ platforms supported • HD quality
           </div>
 
           <h1
@@ -55,7 +58,7 @@ function DownloaderPage() {
             </span>
           </h1>
           <p className="text-gray-500 text-sm sm:text-base max-w-lg mx-auto mb-8">
-            Paste any social media link. Preview the content. Choose your quality. Download instantly.
+            Paste any supported social media link. Preview the content. Choose your quality. Download instantly.
           </p>
         </div>
       </div>
@@ -161,7 +164,7 @@ function DownloaderPage() {
                 Platforms
               </h3>
               <div className="flex flex-wrap gap-2">
-                {['TikTok', 'Instagram', 'YouTube', 'Snapchat', 'Twitter', 'Facebook'].map((p) => (
+                {allPlatformNames.map((p) => (
                   <span key={p} className="px-3 py-1 text-xs rounded-full bg-gray-800 text-gray-400 border border-gray-700">
                     {p}
                   </span>
