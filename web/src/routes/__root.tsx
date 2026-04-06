@@ -65,7 +65,7 @@ function RootComponent() {
               <Download className="w-4.5 h-4.5 text-white" />
             </div>
             <span className="text-lg font-bold text-gray-900 tracking-tight" style={{ fontFamily: "'Poppins', sans-serif" }}>
-              Save<span className="text-orange-500">Media</span>
+              iMedia<span className="text-orange-500">Save</span>
             </span>
           </Link>
           <div className="flex items-center gap-1">
