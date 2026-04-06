@@ -13,7 +13,6 @@ import {
   Headphones,
   Sparkles,
   CheckCircle2,
-  Heart,
 } from 'lucide-react'
 import { SUPPORTED_PLATFORMS } from '@/lib/platforms'
 
