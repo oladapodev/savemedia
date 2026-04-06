@@ -11,7 +11,6 @@ import {
   Twitter,
   Facebook,
   Download,
-  Heart,
 } from 'lucide-react'
 import DownloaderCard from '@/components/DownloaderCard'
 import { SUPPORTED_PLATFORMS } from '@/lib/platforms'
