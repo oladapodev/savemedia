@@ -178,12 +178,12 @@ function DownloaderPage() {
             <p className="text-gray-500 text-xs">
               &copy; {new Date().getFullYear()} iMediaSave. Download responsibly and respect content creators' rights.
             </p>
-            <p className="flex items-center gap-1.5 text-xs text-gray-500">
+            {/* <p className="flex items-center gap-1.5 text-xs text-gray-500">
               Built with <Heart className="w-3.5 h-3.5 text-orange-500 fill-orange-500" /> by
               <span className="font-semibold text-orange-400" style={{ fontFamily: "'Poppins', sans-serif" }}>
                 MayowaCNC
               </span>
-            </p>
+            </p> */}
           </div>
         </div>
       </footer>
