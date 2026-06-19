@@ -3,7 +3,9 @@ import { Download, Home, ArrowDownToLine, BookOpenText } from 'lucide-react'
 
 import '../styles.css'
 
-const ADSENSE_CLIENT_ID = import.meta.env.VITE_ADSENSE_CLIENT_ID || 'ca-pub-2179313175656611'
+const ADSENSE_CLIENT_ID_PATTERN = /^ca-pub-\d+$/
+const configuredAdSenseClientId = import.meta.env.VITE_ADSENSE_CLIENT_ID || 'ca-pub-2179313175656611'
+const adsenseClientId = ADSENSE_CLIENT_ID_PATTERN.test(configuredAdSenseClientId) ? configuredAdSenseClientId : null
 
 export const Route = createRootRoute({
   head: () => ({
@@ -49,11 +51,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
-        <script
-          async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT_ID}`}
-          crossOrigin="anonymous"
-        />
+        {adsenseClientId ? (
+          <script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClientId}`}
+            crossOrigin="anonymous"
+          />
+        ) : null}
       </head>
       <body>
         {children}
