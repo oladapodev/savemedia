@@ -46,9 +46,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
+   
+        <HeadContent />
+
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2179313175656611"
      crossorigin="anonymous"></script>
-        <HeadContent />
       </head>
       <body>
         {children}
