@@ -3,6 +3,10 @@ import { Download, Home, ArrowDownToLine, BookOpenText } from 'lucide-react'
 
 import '../styles.css'
 
+const adsenseClientIdPattern = /^ca-pub-\d+$/
+const configuredAdSenseClientId = import.meta.env.VITE_ADSENSE_CLIENT_ID || 'ca-pub-2179313175656611'
+const adsenseClientId = adsenseClientIdPattern.test(configuredAdSenseClientId) ? configuredAdSenseClientId : null
+
 export const Route = createRootRoute({
   head: () => ({
     meta: [
@@ -47,6 +51,13 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        {adsenseClientId ? (
+          <script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClientId}`}
+            crossOrigin="anonymous"
+          />
+        ) : null}
       </head>
       <body>
         {children}
