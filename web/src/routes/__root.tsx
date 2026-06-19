@@ -3,9 +3,9 @@ import { Download, Home, ArrowDownToLine, BookOpenText } from 'lucide-react'
 
 import '../styles.css'
 
-const ADSENSE_CLIENT_ID_PATTERN = /^ca-pub-\d+$/
+const adsenseClientIdPattern = /^ca-pub-\d+$/
 const configuredAdSenseClientId = import.meta.env.VITE_ADSENSE_CLIENT_ID || 'ca-pub-2179313175656611'
-const adsenseClientId = ADSENSE_CLIENT_ID_PATTERN.test(configuredAdSenseClientId) ? configuredAdSenseClientId : null
+const adsenseClientId = adsenseClientIdPattern.test(configuredAdSenseClientId) ? configuredAdSenseClientId : null
 
 export const Route = createRootRoute({
   head: () => ({
