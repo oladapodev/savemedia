@@ -22,6 +22,7 @@ import {
   detectPlatform,
   PLATFORM_COLORS,
   PLATFORM_NAMES,
+  PLATFORM_ICON_PATHS,
   SUPPORTED_PLATFORM_COPY,
 } from '@/lib/platforms'
 
@@ -486,9 +487,17 @@ export default function DownloaderCard() {
                         </div>
                       )}
                       <div className="flex items-center gap-2 mt-2">
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-gradient-to-r ${PLATFORM_COLORS[preview.platform]} text-white`}>
-                          {PLATFORM_NAMES[preview.platform]}
-                        </span>
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-gradient-to-r ${PLATFORM_COLORS[preview.platform]} text-white`}>
+                        {PLATFORM_ICON_PATHS[preview.platform] ? (
+                          <img
+                            src={PLATFORM_ICON_PATHS[preview.platform]}
+                            alt=""
+                            aria-hidden="true"
+                            className="w-3.5 h-3.5 object-contain"
+                          />
+                        ) : null}
+                        {PLATFORM_NAMES[preview.platform]}
+                      </span>
                         <span className="text-xs text-gray-400">
                           {preview.type || 'video'}
                         </span>

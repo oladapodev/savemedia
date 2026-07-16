@@ -1,35 +1,43 @@
-import { Link, createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import {
-  Camera,
-  Music,
-  Image,
-  Play,
   Shield,
   Zap,
   Monitor,
   Headphones,
-  Twitter,
-  Facebook,
-  Download,
-  Heart,
 } from 'lucide-react'
+import BrandIcon from '@/components/BrandIcon'
 import DownloaderCard from '@/components/DownloaderCard'
-import { SUPPORTED_PLATFORMS } from '@/lib/platforms'
+import LegalNotice from '@/components/LegalNotice'
+import { SUPPORTED_PLATFORMS, type SupportedPlatform } from '@/lib/platforms'
+import { buildSeo } from '@/lib/seo'
 
 export const Route = createFileRoute('/downloader')({
   component: DownloaderPage,
+  head: () => buildSeo({
+    title: 'Social Media Downloader | Preview and Save HD Media',
+    description: 'Paste a supported public media link, preview the result, choose an available quality or format, and download it with iMediaSave.',
+    path: '/downloader',
+    keywords: ['social media downloader', 'HD video downloader', 'download public media', 'audio extraction'],
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'WebApplication',
+      name: 'iMediaSave Downloader',
+      applicationCategory: 'MultimediaApplication',
+      operatingSystem: 'Web',
+      description: 'Preview and download supported public media links in available formats.',
+    },
+  }),
 })
 
-const supportedPlatforms = [
-  { name: 'TikTok', icon: <Music className="w-4 h-4" />, color: 'from-[#ff0050] to-[#00f2ea]' },
-  { name: 'Instagram', icon: <Image className="w-4 h-4" />, color: 'from-purple-600 to-orange-400' },
-  { name: 'Snapchat', icon: <Camera className="w-4 h-4" />, color: 'from-yellow-400 to-yellow-500' },
-  { name: 'YouTube', icon: <Play className="w-4 h-4" />, color: 'from-red-600 to-red-500' },
-  { name: 'Twitter/X', icon: <Twitter className="w-4 h-4" />, color: 'from-blue-400 to-blue-600' },
-  { name: 'Facebook', icon: <Facebook className="w-4 h-4" />, color: 'from-blue-600 to-blue-700' },
-]
+const supportedPlatformIds = ['tiktok', 'instagram', 'snapchat', 'youtube', 'twitter', 'facebook'] as const
 
-const allPlatformNames = SUPPORTED_PLATFORMS.map((platform) => platform.name)
+const supportedPlatforms = supportedPlatformIds
+  .map((platformId) => SUPPORTED_PLATFORMS.find((platform) => platform.id === platformId))
+  .filter((platform): platform is SupportedPlatform => Boolean(platform))
+
+function PlatformIcon({ platform }: { platform: SupportedPlatform }) {
+  return <BrandIcon platform={platform} className="h-4 w-4" />
+}
 
 function DownloaderPage() {
   return (
@@ -76,13 +84,15 @@ function DownloaderPage() {
               key={p.name}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-gray-100 text-xs font-medium text-gray-500"
             >
-              <span className={`bg-gradient-to-r ${p.color} bg-clip-text text-transparent`}>
-                {p.icon}
-              </span>
+              <PlatformIcon platform={p} />
               {p.name}
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="mx-auto max-w-3xl px-4 pb-8">
+        <LegalNotice compact />
       </div>
 
       {/* Features Grid */}
@@ -101,7 +111,7 @@ function DownloaderPage() {
           <div className="bg-white rounded-xl p-4 text-center border border-gray-100">
             <Shield className="w-5 h-5 text-emerald-500 mx-auto mb-2" />
             <p className="text-xs font-medium text-gray-700">Private</p>
-            <p className="text-[10px] text-gray-400 mt-0.5">No data stored</p>
+            <p className="text-[10px] text-gray-400 mt-0.5">No account required</p>
           </div>
           <div className="bg-white rounded-xl p-4 text-center border border-gray-100">
             <Headphones className="w-5 h-5 text-pink-500 mx-auto mb-2" />
@@ -111,82 +121,6 @@ function DownloaderPage() {
         </div>
       </div>
 
-      {/* Professional Footer */}
-      <footer className="bg-gray-900 text-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="py-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Brand */}
-            <div>
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-                  <Download className="w-4.5 h-4.5 text-white" />
-                </div>
-                <span
-                  className="text-lg font-bold tracking-tight"
-                  style={{ fontFamily: "'Poppins', sans-serif" }}
-                >
-                  iMedia<span className="text-orange-400">Save</span>
-                </span>
-              </div>
-              <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
-                Download HD videos and images from your favourite social media platforms. Fast, free, and secure.
-              </p>
-            </div>
-
-            {/* Quick Links */}
-            <div>
-              <h3
-                className="text-sm font-semibold text-white uppercase tracking-wider mb-4"
-                style={{ fontFamily: "'Poppins', sans-serif" }}
-              >
-                Quick Links
-              </h3>
-              <ul className="space-y-2.5">
-                <li>
-                  <Link to="/" className="text-gray-400 hover:text-orange-400 text-sm transition-colors">
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/downloader" className="text-gray-400 hover:text-orange-400 text-sm transition-colors">
-                    Downloader
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Supported Platforms */}
-            <div>
-              <h3
-                className="text-sm font-semibold text-white uppercase tracking-wider mb-4"
-                style={{ fontFamily: "'Poppins', sans-serif" }}
-              >
-                Platforms
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {allPlatformNames.map((p) => (
-                  <span key={p} className="px-3 py-1 text-xs rounded-full bg-gray-800 text-gray-400 border border-gray-700">
-                    {p}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Bar */}
-          <div className="border-t border-gray-800 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-gray-500 text-xs">
-              &copy; {new Date().getFullYear()} iMediaSave. Download responsibly and respect content creators' rights.
-            </p>
-            <p className="flex items-center gap-1.5 text-xs text-gray-500">
-              Built with <Heart className="w-3.5 h-3.5 text-orange-500 fill-orange-500" /> by
-              <span className="font-semibold text-orange-400" style={{ fontFamily: "'Poppins', sans-serif" }}>
-                MayowaCNC
-              </span>
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }

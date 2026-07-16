@@ -1,5 +1,6 @@
 import { Link, createFileRoute } from '@tanstack/react-router'
 import products from '../../data/products'
+import { buildSeo } from '@/lib/seo'
 
 export const Route = createFileRoute('/products/$productId')({
   component: RouteComponent,
@@ -12,6 +13,12 @@ export const Route = createFileRoute('/products/$productId')({
     }
     return product
   },
+  head: ({ loaderData }) => buildSeo({
+    title: `${loaderData?.name ?? 'Product'} | iMediaSave`,
+    description: loaderData?.shortDescription ?? 'Stock product demonstration page.',
+    path: `/products/${loaderData?.id ?? ''}`,
+    noIndex: true,
+  }),
 })
 
 function RouteComponent() {
