@@ -40,7 +40,7 @@ class DownloadSchedulerTest {
       org.mockito.ArgumentMatchers.eq(ExistingWorkPolicy.KEEP),
       request.capture(),
     )
-    assertEquals(NetworkType.CONNECTED, request.value.constraints.requiredNetworkType)
+    assertEquals(NetworkType.CONNECTED, request.value.workSpec.constraints.requiredNetworkType)
     assertEquals("video/mp4", request.value.workSpec.input.getString(DownloadWorker.KEY_MIME_TYPE))
     assertEquals(123L, request.value.workSpec.input.getLong(DownloadScheduler.KEY_ENQUEUED_AT, -1))
     assertEquals(
