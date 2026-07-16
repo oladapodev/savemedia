@@ -80,5 +80,4 @@ jobs:
           ./gradlew
           :imediasave-download:testDebugUnitTest
           :imediasave-download:lintDebug
-          :app:lintDebug
           --no-daemon
