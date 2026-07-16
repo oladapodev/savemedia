@@ -44,10 +44,15 @@ class DownloadSchedulerTest {
     ))
 
     val request = ArgumentCaptor.forClass(OneTimeWorkRequest::class.java)
+    val expectedName = org.mockito.ArgumentMatchers.eq("imediasave-download-job-1")
+      ?: "imediasave-download-job-1"
+    val expectedPolicy = org.mockito.ArgumentMatchers.eq(ExistingWorkPolicy.KEEP)
+      ?: ExistingWorkPolicy.KEEP
+    val capturedRequest = request.capture() ?: fallbackRequest
     verify(manager).enqueueUniqueWork(
-      org.mockito.ArgumentMatchers.eq("imediasave-download-job-1"),
-      org.mockito.ArgumentMatchers.eq(ExistingWorkPolicy.KEEP),
-      request.capture(),
+      expectedName,
+      expectedPolicy,
+      capturedRequest,
     )
     assertEquals(NetworkType.CONNECTED, request.value.workSpec.constraints.requiredNetworkType)
     assertEquals("video/mp4", request.value.workSpec.input.getString(DownloadWorker.KEY_MIME_TYPE))
