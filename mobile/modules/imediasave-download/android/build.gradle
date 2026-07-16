@@ -17,10 +17,6 @@ android {
   testOptions {
     unitTests.includeAndroidResources = true
   }
-
-  lint {
-    checkDependencies = false
-  }
 }
 
 dependencies {

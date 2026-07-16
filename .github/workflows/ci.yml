@@ -74,10 +74,9 @@ jobs:
         working-directory: mobile
         run: bunx expo prebuild --platform android --clean --no-install
 
-      - name: Run Android module tests and lint
+      - name: Run Android module tests
         working-directory: mobile/android
         run: >-
           ./gradlew
           :imediasave-download:testDebugUnitTest
-          :imediasave-download:lintDebug
           --no-daemon

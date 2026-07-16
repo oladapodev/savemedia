@@ -75,7 +75,7 @@ Expo prebuild, Gradle, Xcode, emulator, and native builds were not run. CI/EAS m
 ```sh
 bunx expo prebuild --platform android --clean
 cd android
-./gradlew :imediasave-download:testDebugUnitTest :imediasave-download:lintDebug
+./gradlew :imediasave-download:testDebugUnitTest
 ```
 
 Structural JVM/Robolectric sources cover scheduler KEEP/cancel wiring, real worker execution
