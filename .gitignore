@@ -42,3 +42,7 @@ reference/
 # local scratch files
 CLAUDE.local.md
 foo.css
+.compose/
+/app.json
+/download
+web/.content-collections/
