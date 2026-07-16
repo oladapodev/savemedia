@@ -3,7 +3,7 @@ import {
   createRunOncePlugin,
   type ConfigPlugin,
   withAndroidManifest,
-} from '@expo/config-plugins';
+} from 'expo/config-plugins';
 
 export const DOWNLOAD_PERMISSIONS = [
   'android.permission.INTERNET',

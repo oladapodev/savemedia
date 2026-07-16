@@ -1,4 +1,4 @@
-import type { AndroidConfig } from '@expo/config-plugins';
+import type { AndroidConfig } from 'expo/config-plugins';
 
 import {
   BLOCKED_MEDIA_PERMISSIONS,

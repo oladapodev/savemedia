@@ -4,7 +4,7 @@ import {
   withEntitlementsPlist,
   withFinalizedMod,
   IOSConfig,
-} from '@expo/config-plugins';
+} from 'expo/config-plugins';
 import plist from '@expo/plist';
 
 declare const require: (id: string) => any;
