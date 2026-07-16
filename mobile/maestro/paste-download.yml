@@ -1,0 +1,21 @@
+appId: com.imediasave.app
+name: Paste, start, and cancel a supported download
+tags:
+  - staging
+env:
+  TEST_MEDIA_URL: ${TEST_MEDIA_URL}
+---
+- launchApp:
+    clearState: true
+    permissions:
+      notifications: allow
+- assertVisible: Before your first download
+- tapOn: I understand and accept
+- setClipboard: ${TEST_MEDIA_URL}
+- tapOn: Paste & download
+- extendedWaitUntil:
+    visible: Download in progress
+    timeout: 30000
+- assertVisible: Download progress
+- tapOn: Cancel download
+- assertVisible: Ready to download

@@ -1,6 +1,7 @@
 import { HeadContent, Link, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
-import { Download, Home, ArrowDownToLine, BookOpenText } from 'lucide-react'
+import { ArrowDownToLine, BookOpenText, Download, Home, NotebookText } from 'lucide-react'
 
+import SiteFooter from '@/components/SiteFooter'
 import '../styles.css'
 
 export const Route = createRootRoute({
@@ -97,12 +98,21 @@ function RootComponent() {
               <BookOpenText className="w-4 h-4" />
               <span className="hidden sm:inline">API Docs</span>
             </Link>
+            <Link
+              to="/blog"
+              search={{ category: undefined, tag: undefined }}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-orange-600 hover:bg-orange-50 transition-all [&.active]:text-orange-600 [&.active]:bg-orange-50"
+            >
+              <NotebookText className="w-4 h-4" />
+              <span className="hidden sm:inline">Blog</span>
+            </Link>
           </div>
         </div>
       </nav>
       <div className="pt-16">
         <Outlet />
       </div>
+      <SiteFooter />
     </>
   )
 }

@@ -1,7 +1,7 @@
 SHELL := /bin/bash
 .DEFAULT_GOAL := help
 
-.PHONY: help doctor setup install dev dev-web dev-api dev-api-local lint typecheck check gcp-setup gcp-docker-auth gcp-secrets gcp-github-oidc push-api push-web push-images deploy-api deploy-web deploy-sync deploy-run build build-api preview-web compose-up compose-down compose-logs
+.PHONY: help doctor setup install dev dev-web dev-mobile dev-api dev-api-local dev-all lint typecheck test check gcp-setup gcp-docker-auth gcp-secrets gcp-github-oidc push-api push-web push-images deploy-api deploy-web deploy-sync deploy-run build build-all build-api preview-web compose-up compose-down compose-logs
 
 help:
 	@printf "Available targets:\n"
@@ -9,10 +9,13 @@ help:
 	@printf "  make setup           # install workspace dependencies with Bun\n"
 	@printf "  make dev             # start dockerized cobalt API and local web dev server\n"
 	@printf "  make dev-web         # run only the local iMediaSave web dev server\n"
+	@printf "  make dev-mobile      # run Expo Metro for a physical phone\n"
 	@printf "  make dev-api         # run only the dockerized cobalt API\n"
 	@printf "  make dev-api-local   # run the cobalt API directly with Node\n"
+	@printf "  make dev-all         # run API, web, and mobile Metro together\n"
 	@printf "  make lint            # run frontend eslint\n"
 	@printf "  make typecheck       # run frontend TypeScript typecheck\n"
+	@printf "  make test            # run workspace tests\n"
 	@printf "  make check           # run lint + typecheck\n"
 	@printf "  make gcp-setup       # enable APIs and create Artifact Registry for local Docker pushes\n"
 	@printf "  make gcp-docker-auth # configure Docker auth for Artifact Registry\n"
@@ -26,6 +29,7 @@ help:
 	@printf "  make deploy-sync     # update the live service URLs after deployment\n"
 	@printf "  make deploy-run      # push both images and deploy both services\n"
 	@printf "  make build           # build the iMediaSave web app\n"
+	@printf "  make build-all       # run every workspace build task\n"
 	@printf "  make preview-web     # run the built iMediaSave web output\n"
 	@printf "  make compose-up      # run the full dockerized web + api stack\n"
 	@printf "  make compose-down    # stop the dockerized stack\n"
@@ -43,20 +47,29 @@ dev:
 dev-web:
 	@./scripts/dev-web.sh
 
+dev-mobile:
+	@./scripts/dev-mobile.sh
+
 dev-api:
 	@./scripts/dev-api-docker.sh
 
 dev-api-local:
 	@./scripts/dev-api-local.sh
 
+dev-all:
+	@./scripts/dev-all.sh
+
 lint:
 	@./scripts/lint-web.sh
 
 typecheck:
-	@./scripts/typecheck-web.sh
+	@bun run typecheck
+
+test:
+	@bun run test
 
 check:
-	@./scripts/check-web.sh
+	@bun run check
 
 gcp-setup:
 	@./scripts/gcp-setup.sh
@@ -93,6 +106,9 @@ deploy-run:
 
 build:
 	@./scripts/build-web.sh
+
+build-all:
+	@bun run build:all
 
 build-api:
 	@./scripts/build-api.sh

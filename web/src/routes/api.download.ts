@@ -1,13 +1,19 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { detectPlatform, SUPPORTED_PLATFORM_COPY } from '@/lib/platforms'
+import {
+  concreteDownloadMime,
+  extensionForConcreteDownloadMime,
+  filenameForConcreteDownloadMime,
+  type ConcreteDownloadMime,
+} from '@/lib/downloadMime'
 
 interface CobaltResponse {
   status?: 'redirect' | 'tunnel' | 'picker' | 'local-processing' | 'error'
   url?: string
   filename?: string
   error?: unknown
-  picker?: Array<{ url: string; thumb?: string; type?: string }>
+  picker?: Array<{ url: string; thumb?: string; type?: string; filename?: string; mimeType?: string }>
   audio?: string
   audioFilename?: string
   tunnel?: string[]
@@ -15,6 +21,12 @@ interface CobaltResponse {
     filename?: string
   }
   type?: string
+}
+
+function mediaTypeForMime(mimeType: ConcreteDownloadMime): 'audio' | 'image' | 'video' {
+  if (mimeType.startsWith('audio/')) return 'audio'
+  if (mimeType.startsWith('image/')) return 'image'
+  return 'video'
 }
 
 const COBALT_ERROR_MESSAGES: Record<string, string> = {
@@ -202,28 +214,69 @@ export const Route = createFileRoute('/api/download')({
           }
 
           if ((data.status === 'redirect' || data.status === 'tunnel') && data.url) {
+            const rawFilename = data.filename || `${platform}-media`
+            const mimeType = concreteDownloadMime({
+              filename: rawFilename,
+              url: data.url,
+              contentType: data.type,
+              quality,
+            })
+            if (!mimeType) {
+              return Response.json({ error: 'The download service did not provide a supported concrete media format.', platform }, { status: 502 })
+            }
             return Response.json({
               success: true,
               platform,
               downloadUrl: data.url,
-              filename: data.filename || `${platform}-media`,
-              type: quality === 'audio' ? 'audio' : 'video',
+              filename: filenameForConcreteDownloadMime(rawFilename, mimeType),
+              type: mediaTypeForMime(mimeType),
+              mimeType,
             })
           }
 
           if (data.status === 'picker' && Array.isArray(data.picker)) {
-            const items = data.picker.map((item, index) => ({
-              url: item.url,
-              thumb: item.thumb,
-              type: item.type || 'video',
-              filename: `${platform}-media-${index + 1}`,
-            }))
+            if (quality === 'audio' && data.audio) {
+              const audioBase = data.audioFilename || `${platform}-audio`
+              const filename = filenameForConcreteDownloadMime(audioBase, 'audio/mpeg')
+              return Response.json({
+                success: true,
+                platform,
+                downloadUrl: data.audio,
+                filename,
+                type: 'audio',
+                mimeType: 'audio/mpeg',
+              })
+            }
+            const items = data.picker.map((item, index) => {
+              const fallbackFilename = item.filename || `${platform}-media-${index + 1}`
+              const mimeType = concreteDownloadMime({
+                filename: fallbackFilename,
+                url: item.url,
+                contentType: item.mimeType,
+                pickerType: item.type,
+              })
+              if (!mimeType) return null
+              const filename = filenameForConcreteDownloadMime(
+                item.filename || `${fallbackFilename}.${extensionForConcreteDownloadMime(mimeType)}`,
+                mimeType,
+              )
+              return {
+                url: item.url,
+                thumb: item.thumb,
+                type: mediaTypeForMime(mimeType),
+                filename,
+                mimeType,
+              }
+            })
+            if (items.some((item) => item === null) || items.length === 0) {
+              return Response.json({ error: 'The download service returned an unsupported picker media format.', platform }, { status: 502 })
+            }
 
             return Response.json({
               success: true,
               platform,
               multiple: true,
-              items,
+              items: items.filter((item) => item !== null),
               audio: data.audio,
               audioFilename: data.audioFilename,
             })
@@ -241,12 +294,23 @@ export const Route = createFileRoute('/api/download')({
           }
 
           if (data.url) {
+            const rawFilename = data.filename || data.output?.filename || `${platform}-media`
+            const mimeType = concreteDownloadMime({
+              filename: rawFilename,
+              url: data.url,
+              contentType: data.type,
+              quality,
+            })
+            if (!mimeType) {
+              return Response.json({ error: 'The download service did not provide a supported concrete media format.', platform }, { status: 502 })
+            }
             return Response.json({
               success: true,
               platform,
               downloadUrl: data.url,
-              filename: data.filename || data.output?.filename || `${platform}-media`,
-              type: quality === 'audio' ? 'audio' : (data.type || 'video'),
+              filename: filenameForConcreteDownloadMime(rawFilename, mimeType),
+              type: mediaTypeForMime(mimeType),
+              mimeType,
             })
           }
 

@@ -1,0 +1,88 @@
+{
+  "expo": {
+    "name": "iMediaSave",
+    "slug": "imediasave",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "imediasave",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.imediasave.app"
+    },
+    "android": {
+      "package": "com.imediasave.app",
+      "blockedPermissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.ACCESS_MEDIA_LOCATION"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-sharing",
+        {
+          "ios": {
+            "enabled": true,
+            "extensionBundleIdentifier": "com.imediasave.app.ShareExtension",
+            "appGroupId": "group.com.imediasave.app",
+            "activationRule": {
+              "supportsText": true,
+              "supportsWebUrlWithMaxCount": 1,
+              "supportsImageWithMaxCount": 10,
+              "supportsMovieWithMaxCount": 10
+            }
+          },
+          "android": {
+            "enabled": false
+          }
+        }
+      ],
+      "expo-sqlite",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow iMediaSave to show your saved media.",
+          "savePhotosPermission": "Allow iMediaSave to save downloaded media.",
+          "granularPermissions": []
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "defaultChannel": "downloads"
+        }
+      ],
+      "expo-status-bar",
+      "./plugins/withDownloadModule.ts",
+      "./plugins/withShareExtension.ts"
+    ],
+    "extra": {
+      "eas": {
+        "build": {
+          "experimental": {
+            "ios": {
+              "appExtensions": [
+                {
+                  "targetName": "ShareExtension",
+                  "bundleIdentifier": "com.imediasave.app.ShareExtension",
+                  "entitlements": {
+                    "com.apple.security.application-groups": [
+                      "group.com.imediasave.app"
+                    ]
+                  }
+                }
+              ]
+            }
+          }
+        },
+        "projectId": "6203a860-556a-4acc-99a9-0ec6535a10f5"
+      }
+    }
+  }
+}

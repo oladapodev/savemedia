@@ -1,0 +1,19 @@
+appId: com.imediasave.app
+name: Choose one item from an ambiguous media link
+tags:
+  - staging
+env:
+  TEST_SELECTION_URL: ${TEST_SELECTION_URL}
+---
+- launchApp:
+    clearState: true
+- tapOn: I understand and accept
+- setClipboard: ${TEST_SELECTION_URL}
+- tapOn: Paste & download
+- extendedWaitUntil:
+    visible: Choose media
+    timeout: 30000
+- tapOn:
+    text: Choose (Video|Image|Audio) .*
+    index: 0
+- assertVisible: Download in progress

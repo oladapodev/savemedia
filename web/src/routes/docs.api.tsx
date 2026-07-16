@@ -1,21 +1,23 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { BookOpen, Lock, Server, Sparkles } from 'lucide-react'
 
+import LegalNotice from '@/components/LegalNotice'
 import ScalarApiReference from '@/components/ScalarApiReference'
+import { buildSeo } from '@/lib/seo'
 
 export const Route = createFileRoute('/docs/api')({
   component: ApiDocsPage,
-  head: () => ({
-    meta: [
-      {
-        title: 'iMediaSave API Docs',
-      },
-      {
-        name: 'description',
-        content:
-          'Interactive API documentation for the iMediaSave wrapper API, including preview, download, and proxy endpoints.',
-      },
-    ],
+  head: () => buildSeo({
+    title: 'iMediaSave API Documentation | Preview and Download API',
+    description: 'Interactive API documentation for the iMediaSave wrapper API, including preview, download, and proxy endpoints.',
+    path: '/docs/api',
+    keywords: ['media download API', 'video preview API', 'iMediaSave API documentation'],
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'TechArticle',
+      headline: 'iMediaSave API Documentation',
+      description: 'Reference documentation for the iMediaSave public wrapper API.',
+    },
   }),
 })
 
@@ -76,6 +78,14 @@ function ApiDocsPage() {
           </div>
         </div>
 
+        <LegalNotice title="API and media-use responsibility">
+          <p>
+            API access does not grant permission to download or reuse third-party media. Clients must validate submitted URLs,
+            protect returned links, respect platform terms and rate limits, and use the endpoints only for lawful, authorized content.
+          </p>
+        </LegalNotice>
+
+        <div className="h-6" aria-hidden="true" />
         <ScalarApiReference />
       </div>
     </div>

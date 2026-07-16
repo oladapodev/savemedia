@@ -1,9 +1,10 @@
 {
   "name": "imediasave-workspace",
   "private": true,
-  "packageManager": "pnpm@9.6.0",
+  "packageManager": "bun@1.3.14",
   "engines": {
-    "pnpm": ">=9"
+    "node": ">=22.13",
+    "bun": ">=1.3.14"
   },
   "scripts": {
     "doctor": "./scripts/doctor.sh",
@@ -12,9 +13,17 @@
     "dev:web": "./scripts/dev-web.sh",
     "dev:api": "./scripts/dev-api-docker.sh",
     "dev:api:local": "./scripts/dev-api-local.sh",
-    "lint": "./scripts/lint-web.sh",
-    "typecheck": "./scripts/typecheck-web.sh",
-    "check": "./scripts/check-web.sh",
+    "dev:mobile": "./scripts/dev-mobile.sh",
+    "dev:all": "./scripts/dev-all.sh",
+    "turbo": "bun node_modules/turbo/bin/turbo",
+    "lint": "bun run turbo run lint",
+    "typecheck": "bun run turbo run typecheck",
+    "test": "bun run turbo run test --filter=@imediasave/web && bun run test:mobile",
+    "test:mobile": "bun run --cwd mobile test",
+    "test:api": "bun run --cwd api test",
+    "check": "bun run check:workspace && bun run lint && bun run typecheck && bun run test",
+    "check:workspace": "bun scripts/check-workspace.ts",
+    "mobile:doctor": "bun run --cwd mobile doctor",
     "gcp:setup": "./scripts/gcp-setup.sh",
     "gcp:docker-auth": "./scripts/gcp-docker-auth.sh",
     "gcp:secrets": "./scripts/setup-cloudrun-secrets.sh",
@@ -26,7 +35,8 @@
     "deploy:web": "./scripts/deploy-web-run.sh",
     "deploy:sync": "./scripts/sync-cloudrun-urls.sh",
     "deploy:run": "./scripts/deploy-all-run.sh",
-    "build": "./scripts/build-web.sh",
+    "build": "bun run turbo run build --filter=@imediasave/web",
+    "build:all": "bun run turbo run build",
     "build:web": "./scripts/build-web.sh",
     "build:api": "./scripts/build-api.sh",
     "preview:web": "./scripts/preview-web.sh",
@@ -37,6 +47,10 @@
   "workspaces": [
     "api",
     "web",
+    "mobile",
     "packages/*"
-  ]
+  ],
+  "devDependencies": {
+    "turbo": "^2.9.15"
+  }
 }

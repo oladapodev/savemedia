@@ -254,7 +254,7 @@ export const iMediaSaveOpenApiSpec = {
       },
       DownloadItem: {
         type: 'object',
-        required: ['url', 'type', 'filename'],
+        required: ['url', 'type', 'filename', 'mimeType'],
         properties: {
           url: {
             type: 'string',
@@ -270,17 +270,27 @@ export const iMediaSaveOpenApiSpec = {
           filename: {
             type: 'string',
           },
+          mimeType: {
+            type: 'string',
+            description: 'Validated concrete media MIME type. Wildcards and application/octet-stream are never returned.',
+            enum: ['audio/mpeg', 'audio/mp4', 'audio/ogg', 'audio/wav', 'image/gif', 'image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/quicktime', 'video/webm'],
+          },
         },
       },
       SingleDownloadResponse: {
         type: 'object',
-        required: ['success', 'platform', 'downloadUrl', 'filename', 'type'],
+        required: ['success', 'platform', 'downloadUrl', 'filename', 'type', 'mimeType'],
         properties: {
           success: { type: 'boolean', enum: [true] },
           platform: { type: 'string' },
           downloadUrl: { type: 'string', format: 'uri' },
           filename: { type: 'string' },
           type: { type: 'string' },
+          mimeType: {
+            type: 'string',
+            description: 'Validated concrete media MIME type used unchanged by native download validation.',
+            enum: ['audio/mpeg', 'audio/mp4', 'audio/ogg', 'audio/wav', 'image/gif', 'image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/quicktime', 'video/webm'],
+          },
         },
       },
       MultiDownloadResponse: {

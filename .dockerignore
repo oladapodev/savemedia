@@ -5,6 +5,7 @@ desktop.ini
 # node
 node_modules
 web/node_modules
+mobile/node_modules
 reference/cobalt-web/node_modules
 .git
 gha-creds-*.json
@@ -14,6 +15,8 @@ build
 dist
 web/.output
 web/.tanstack
+mobile/.expo
+mobile/dist
 
 # secrets
 .env

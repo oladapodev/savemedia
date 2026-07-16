@@ -5,7 +5,9 @@ import {
   Music,
   Image,
   ArrowRight,
-  Shield,
+  Clock3,
+  Eye,
+  Gauge,
   Zap,
   Globe,
   Play,
@@ -13,80 +15,195 @@ import {
   Headphones,
   Sparkles,
   CheckCircle2,
+  Users,
+  ShieldCheck,
 } from 'lucide-react'
-import { SUPPORTED_PLATFORMS } from '@/lib/platforms'
+import BrandIcon from '@/components/BrandIcon'
+import { getPlatform, SUPPORTED_PLATFORMS } from '@/lib/platforms'
+import { buildSeo, websiteJsonLd } from '@/lib/seo'
+import type { ReactNode } from 'react'
 
 export const Route = createFileRoute('/')({
   component: HomePage,
+  head: () => buildSeo({
+    title: 'iMediaSave — HD Video and Image Downloader',
+    description: 'Preview and download supported public videos, images, and audio in available HD formats from TikTok, Instagram, YouTube, X, and more.',
+    path: '/',
+    keywords: ['video downloader', 'image downloader', 'social media downloader', 'HD media download'],
+    jsonLd: websiteJsonLd(),
+  }),
 })
 
-const platforms = [
+type PlatformFeature = {
+  name: string
+  desc: string
+  icon: ReactNode
+  gradient: string
+}
+
+type Feature = {
+  icon: ReactNode
+  title: string
+  desc: string
+  color: string
+}
+
+type ProcessStep = {
+  step: string
+  title: string
+  desc: string
+}
+
+type UseCase = {
+  title: string
+  desc: string
+}
+
+type PlatformFeatureItem = PlatformFeature & { id: string }
+
+const platforms: PlatformFeatureItem[] = [
   {
+    id: 'tiktok',
     name: 'TikTok',
-    desc: 'Videos, slideshows, and music without watermarks',
+    desc: 'Download clips, stories, and music exports without extra steps or ads.',
     icon: <Music className="w-6 h-6 text-white" />,
     gradient: 'from-[#ff0050] to-[#00f2ea]',
   },
   {
+    id: 'instagram',
     name: 'Instagram',
-    desc: 'Reels, posts, stories, and IGTV in full quality',
+    desc: 'Save Reels, posts, carousels, and IGTV for offline collections.',
     icon: <Image className="w-6 h-6 text-white" />,
     gradient: 'from-purple-600 via-pink-500 to-orange-400',
   },
   {
+    id: 'snapchat',
     name: 'Snapchat',
-    desc: 'Stories, spotlights, and shared snaps',
+    desc: 'Pull moments from Stories, spotlights, and public media links with quality options.',
     icon: <Camera className="w-6 h-6 text-white" />,
     gradient: 'from-yellow-400 to-yellow-500',
   },
   {
+    id: 'youtube',
     name: 'YouTube',
-    desc: 'Videos and shorts in up to 4K quality',
+    desc: 'Get single videos or shorts with stable links and selectable formats.',
     icon: <Play className="w-6 h-6 text-white" />,
     gradient: 'from-red-600 to-red-500',
   },
 ]
 
-const features = [
+function PlatformLogo({ platformId, className = 'w-6 h-6' }: { platformId: string; className?: string }) {
+  const platform = getPlatform(platformId)
+  if (!platform) return null
+
+  return <BrandIcon platform={platform} className={className} decorative monochrome />
+}
+
+const features: Feature[] = [
   {
     icon: <Monitor className="w-5 h-5" />,
     title: 'HD & 4K Quality',
-    desc: 'Download in the highest quality available — up to 4K Ultra HD',
+    desc: 'Get the best stream available for each post, including HD and up to 4K options where the source permits.',
     color: 'text-orange-500',
   },
   {
     icon: <Sparkles className="w-5 h-5" />,
     title: 'Content Preview',
-    desc: "See what you're downloading before you save it to your device",
+    desc: 'Preview your selected item first, confirm the exact content, then save only what you need.',
     color: 'text-amber-500',
   },
   {
     icon: <Zap className="w-5 h-5" />,
     title: 'Lightning Fast',
-    desc: 'Content is processed instantly so you can save media in seconds',
+    desc: 'Paste a link once and quickly get ready-to-download media with minimal waiting time.',
     color: 'text-yellow-500',
   },
   {
-    icon: <Shield className="w-5 h-5" />,
-    title: 'Safe & Private',
-    desc: 'No data is stored and no account needed. Completely anonymous',
+    icon: <ShieldCheck className="w-5 h-5" />,
+    title: 'Private by Design',
+    desc: 'No account is required, and your pasted links are not kept in a public profile.',
     color: 'text-emerald-500',
   },
   {
     icon: <Headphones className="w-5 h-5" />,
     title: 'Audio Extract',
-    desc: 'Extract audio from any video as high-quality MP3 files',
+    desc: 'Save soundtrack-heavy clips by extracting audio in a clean MP3 output.',
     color: 'text-pink-500',
   },
   {
     icon: <Globe className="w-5 h-5" />,
-    title: `${SUPPORTED_PLATFORMS.length}+ Platforms`,
-    desc: 'TikTok, Instagram, YouTube, Snapchat, Reddit, SoundCloud, Vimeo, Twitch and more',
+    title: `${SUPPORTED_PLATFORMS.length}+ Supported Services`,
+    desc: 'TikTok, Instagram, YouTube, Snapchat, Reddit, SoundCloud, Vimeo, Twitch, and continuously expanding support.',
     color: 'text-blue-500',
   },
 ]
 
-const footerPlatformNames = SUPPORTED_PLATFORMS.map((platform) => platform.name)
+const useCases: UseCase[] = [
+  {
+    title: 'Research & Study',
+    desc: 'Store reference media for learning, training, or offline review.',
+  },
+  {
+    title: 'Creative Production',
+    desc: 'Collect visual references, trends, and music snippets for inspiration pipelines.',
+  },
+  {
+    title: 'Backup & Archival',
+    desc: 'Keep important clips and posts available even when originals are removed.',
+  },
+]
+
+const processSteps: ProcessStep[] = [
+  {
+    step: '01',
+    title: 'Paste a public share link',
+    desc: 'Copy the link from any supported platform and send it to iMediaSave.',
+  },
+  {
+    step: '02',
+    title: 'Preview and choose settings',
+    desc: 'Review media metadata, select the format, file type, and quality you want.',
+  },
+  {
+    step: '03',
+    title: 'Download in seconds',
+    desc: 'Use the direct button to fetch your file and save it locally immediately.',
+  },
+]
+
+type TrustSignal = {
+  icon: ReactNode
+  title: string
+  desc: string
+  color: string
+}
+
+const trustSignals: TrustSignal[] = [
+  {
+    icon: <Gauge className="w-5 h-5" />,
+    title: 'Fast processing',
+    desc: 'Optimized workflow for quick fetch and conversion.',
+    color: 'text-emerald-500',
+  },
+  {
+    icon: <Eye className="w-5 h-5" />,
+    title: 'Preview first',
+    desc: 'Confirm the exact content before final download.',
+    color: 'text-blue-500',
+  },
+  {
+    icon: <Clock3 className="w-5 h-5" />,
+    title: 'Built for speed',
+    desc: 'Minimal clicks from link to file.',
+    color: 'text-amber-500',
+  },
+  {
+    icon: <Users className="w-5 h-5" />,
+    title: 'No sign-up',
+    desc: 'Use instantly without creating an account.',
+    color: 'text-purple-500',
+  },
+]
 
 function HomePage() {
   return (
@@ -100,26 +217,32 @@ function HomePage() {
           <div className="absolute bottom-0 left-1/2 w-64 h-64 bg-orange-100/20 rounded-full blur-[80px]" />
         </div>
 
-        <div className="relative max-w-4xl mx-auto px-4 pt-20 pb-16 text-center">
+      <div className="relative max-w-4xl mx-auto px-4 pt-20 pb-16 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-sm font-medium text-orange-600 mb-8">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            Free HD Video & Image Downloader
+            Free HD Video & Image Downloader built for everyday creators
           </div>
 
           <h1
             className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 mb-5 leading-tight tracking-tight"
             style={{ fontFamily: "'Poppins', sans-serif" }}
           >
-            Download Videos in
+            Download anything from
             <br />
             <span className="bg-gradient-to-r from-orange-500 via-orange-400 to-amber-500 bg-clip-text text-transparent">
-              HD Quality
+              social media in one click
             </span>
           </h1>
 
-          <p className="text-lg text-gray-500 mb-10 max-w-xl mx-auto leading-relaxed">
-            Paste any link from TikTok, Instagram, YouTube, Snapchat, Reddit, SoundCloud, Vimeo, Twitch, and more.
-            Preview the content, choose quality, and download instantly.
+          <p className="text-lg text-gray-500 mb-4 max-w-2xl mx-auto leading-relaxed">
+            iMediaSave is a clean, brand-neutral downloader built on a privacy-aware flow.
+            Paste any supported link, preview the media first, select quality and format, then
+            download instantly without signing up.
+          </p>
+
+          <p className="text-sm text-gray-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+            Designed for creators, students, and teams who prefer speed, control, and no account
+            friction.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -151,8 +274,8 @@ function HomePage() {
       {/* Supported Platforms */}
       <div className="max-w-4xl mx-auto px-4 pb-20">
         <h2 className="text-center text-xs font-semibold text-gray-400 uppercase tracking-widest mb-8">
-          Supported Platforms
-        </h2>
+            Supported Platforms
+          </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {platforms.map((p) => (
             <Link
@@ -163,14 +286,19 @@ function HomePage() {
               <div
                 className={`w-11 h-11 rounded-xl bg-gradient-to-br ${p.gradient} flex items-center justify-center mb-3.5 shadow-lg`}
               >
-                {p.icon}
+                <PlatformLogo platformId={p.id} className="w-5 h-5 object-contain" />
               </div>
               <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-orange-600 transition-colors">
                 {p.name}
               </h3>
-              <p className="text-xs text-gray-400 leading-relaxed">{p.desc}</p>
+              <p className="text-sm text-gray-500 leading-relaxed">{p.desc}</p>
             </Link>
-          ))}
+            ))}
+        </div>
+
+        <div className="mt-10 text-sm text-gray-500">
+          iMediaSave works with links from TikTok, Instagram, YouTube, Snapchat, Reddit, SoundCloud,
+          Vimeo, Twitch, and more.
         </div>
       </div>
 
@@ -184,29 +312,34 @@ function HomePage() {
             How It Works
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                step: '1',
-                title: 'Paste the Link',
-                desc: 'Copy the share link from any supported platform and paste it into the downloader',
-              },
-              {
-                step: '2',
-                title: 'Preview & Select Quality',
-                desc: 'See a preview of the content and choose your preferred quality — from 360p to 4K',
-              },
-              {
-                step: '3',
-                title: 'Download',
-                desc: 'Hit download and save the content directly to your device in seconds',
-              },
-            ].map((item) => (
+            {processSteps.map((item) => (
               <div key={item.step} className="text-center">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-100 to-amber-100 border border-orange-200 text-orange-600 flex items-center justify-center font-bold text-lg mx-auto mb-4">
                   {item.step}
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">{item.title}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{item.desc}</p>
+                <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Trust Signals */}
+      <div className="max-w-5xl mx-auto px-4 pb-20">
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 shadow-sm">
+          <h2
+            className="text-2xl font-bold text-gray-900 text-center mb-8"
+            style={{ fontFamily: "'Poppins', sans-serif" }}
+          >
+            Quick Value Signals
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {trustSignals.map((signal) => (
+              <div key={signal.title} className="rounded-xl border border-gray-100 bg-gray-50 p-4">
+                <div className={`${signal.color} mb-2`}><span aria-hidden="true">{signal.icon}</span></div>
+                <h3 className="font-semibold text-sm text-gray-900 mb-1">{signal.title}</h3>
+                <p className="text-xs text-gray-500 leading-relaxed">{signal.desc}</p>
               </div>
             ))}
           </div>
@@ -219,7 +352,7 @@ function HomePage() {
           className="text-2xl font-bold text-gray-900 text-center mb-12"
           style={{ fontFamily: "'Poppins', sans-serif" }}
         >
-          Why iMediaSave?
+          Why people use iMediaSave
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {features.map((f) => (
@@ -232,6 +365,32 @@ function HomePage() {
         </div>
       </div>
 
+      {/* Use Cases */}
+      <div className="max-w-5xl mx-auto px-4 pb-20">
+        <div className="bg-gradient-to-r from-orange-50 via-white to-amber-50 rounded-2xl border border-orange-100 p-6 sm:p-8">
+          <div className="text-center max-w-3xl mx-auto mb-8">
+            <h2
+              className="text-2xl font-bold text-gray-900"
+              style={{ fontFamily: "'Poppins', sans-serif" }}
+            >
+              Use cases that fit the real workflow
+            </h2>
+            <p className="text-sm text-gray-500 mt-3">
+              Add links directly from your browser or notes app and pull down the files you actually need.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {useCases.map((useCase) => (
+              <article key={useCase.title} className="rounded-xl bg-white border border-orange-100 p-5">
+                <h3 className="font-semibold text-gray-900 mb-2">{useCase.title}</h3>
+                <p className="text-sm text-gray-500 leading-relaxed">{useCase.desc}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* CTA */}
       <div className="max-w-3xl mx-auto px-4 pb-20">
         <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-8 sm:p-10 text-center shadow-xl shadow-orange-500/20">
@@ -239,10 +398,11 @@ function HomePage() {
             className="text-xl sm:text-2xl font-bold text-white mb-3"
             style={{ fontFamily: "'Poppins', sans-serif" }}
           >
-            Ready to download?
+            Ready to download faster and cleaner?
           </h2>
           <p className="text-sm text-white/80 mb-6 max-w-md mx-auto">
-            No registration, no limits. Just paste your link and get your content in HD.
+            No registration required. Paste your link and save available content in your preferred
+            quality and format.
           </p>
           <Link
             to="/downloader"
@@ -254,77 +414,6 @@ function HomePage() {
         </div>
       </div>
 
-      {/* Professional Footer */}
-      <footer className="bg-gray-900 text-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          {/* Main Footer */}
-          <div className="py-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* Brand */}
-            <div>
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
-                  <Download className="w-4.5 h-4.5 text-white" />
-                </div>
-                <span
-                  className="text-lg font-bold tracking-tight"
-                  style={{ fontFamily: "'Poppins', sans-serif" }}
-                >
-                  iMedia<span className="text-orange-400">Save</span>
-                </span>
-              </div>
-              <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
-                Download HD videos and images from your favourite social media platforms. Fast, free, and secure.
-              </p>
-            </div>
-
-            {/* Quick Links */}
-            <div>
-              <h3
-                className="text-sm font-semibold text-white uppercase tracking-wider mb-4"
-                style={{ fontFamily: "'Poppins', sans-serif" }}
-              >
-                Quick Links
-              </h3>
-              <ul className="space-y-2.5">
-                <li>
-                  <Link to="/" className="text-gray-400 hover:text-orange-400 text-sm transition-colors">
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/downloader" className="text-gray-400 hover:text-orange-400 text-sm transition-colors">
-                    Downloader
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            {/* Supported Platforms */}
-            <div>
-              <h3
-                className="text-sm font-semibold text-white uppercase tracking-wider mb-4"
-                style={{ fontFamily: "'Poppins', sans-serif" }}
-              >
-                Platforms
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {footerPlatformNames.map((p) => (
-                  <span key={p} className="px-3 py-1 text-xs rounded-full bg-gray-800 text-gray-400 border border-gray-700">
-                    {p}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Bar */}
-          <div className="border-t border-gray-800 py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-gray-500 text-xs">
-              &copy; {new Date().getFullYear()} iMediaSave. Download responsibly and respect content creators' rights.
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   )
 }

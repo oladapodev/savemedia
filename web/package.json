@@ -5,13 +5,18 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "build": "vite build",
+    "content": "bun ../scripts/content.ts",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
-    "check": "bun run lint && bun run typecheck",
+    "typecheck": "bun run content && tsc --noEmit",
+    "test": "bun test",
+    "check": "bun run lint && bun run typecheck && bun run test",
     "preview": "vite preview",
     "start": "node .output/server/index.mjs"
   },
   "dependencies": {
+    "@content-collections/core": "^0.15.2",
+    "@content-collections/markdown": "^0.1.4",
+    "@content-collections/vite": "^0.3.0",
     "@scalar/api-reference-react": "^0.9.15",
     "@tailwindcss/vite": "^4.0.6",
     "@tanstack/react-router": "^1.163.3",
@@ -19,8 +24,8 @@
     "@tanstack/router-plugin": "^1.164.0",
     "highlight.js": "^11.11.1",
     "lucide-react": "^0.576.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
     "tailwindcss": "^4.0.6",
     "vite-tsconfig-paths": "^6.0.2",
     "zod": "^4.3.6"
@@ -28,6 +33,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@tailwindcss/vite": "^4.0.6",
+    "@types/bun": "^1.3.14",
     "@types/node": "^22.10.2",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",

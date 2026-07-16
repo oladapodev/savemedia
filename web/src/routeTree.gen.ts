@@ -9,23 +9,60 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as DownloaderRouteImport } from './routes/downloader'
+import { Route as DisclaimerRouteImport } from './routes/disclaimer'
+import { Route as BlogRouteImport } from './routes/blog'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as ProductsProductIdRouteImport } from './routes/products/$productId'
 import { Route as DocsApiRouteImport } from './routes/docs.api'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ApiProxyDownloadRouteImport } from './routes/api.proxy-download'
 import { Route as ApiPreviewRouteImport } from './routes/api.preview'
 import { Route as ApiDownloadRouteImport } from './routes/api.download'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DownloaderRoute = DownloaderRouteImport.update({
   id: '/downloader',
   path: '/downloader',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DisclaimerRoute = DisclaimerRouteImport.update({
+  id: '/disclaimer',
+  path: '/disclaimer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => BlogRoute,
 } as any)
 const ProductsProductIdRoute = ProductsProductIdRouteImport.update({
   id: '/products/$productId',
@@ -36,6 +73,11 @@ const DocsApiRoute = DocsApiRouteImport.update({
   id: '/docs/api',
   path: '/docs/api',
   getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => BlogRoute,
 } as any)
 const ApiProxyDownloadRoute = ApiProxyDownloadRouteImport.update({
   id: '/api/proxy-download',
@@ -55,65 +97,110 @@ const ApiDownloadRoute = ApiDownloadRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/blog': typeof BlogRouteWithChildren
+  '/disclaimer': typeof DisclaimerRoute
   '/downloader': typeof DownloaderRoute
+  '/privacy': typeof PrivacyRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/download': typeof ApiDownloadRoute
   '/api/preview': typeof ApiPreviewRoute
   '/api/proxy-download': typeof ApiProxyDownloadRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/docs/api': typeof DocsApiRoute
   '/products/$productId': typeof ProductsProductIdRoute
+  '/blog/': typeof BlogIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/disclaimer': typeof DisclaimerRoute
   '/downloader': typeof DownloaderRoute
+  '/privacy': typeof PrivacyRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/download': typeof ApiDownloadRoute
   '/api/preview': typeof ApiPreviewRoute
   '/api/proxy-download': typeof ApiProxyDownloadRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/docs/api': typeof DocsApiRoute
   '/products/$productId': typeof ProductsProductIdRoute
+  '/blog': typeof BlogIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/blog': typeof BlogRouteWithChildren
+  '/disclaimer': typeof DisclaimerRoute
   '/downloader': typeof DownloaderRoute
+  '/privacy': typeof PrivacyRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/download': typeof ApiDownloadRoute
   '/api/preview': typeof ApiPreviewRoute
   '/api/proxy-download': typeof ApiProxyDownloadRoute
+  '/blog/$slug': typeof BlogSlugRoute
   '/docs/api': typeof DocsApiRoute
   '/products/$productId': typeof ProductsProductIdRoute
+  '/blog/': typeof BlogIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/blog'
+    | '/disclaimer'
     | '/downloader'
+    | '/privacy'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/api/download'
     | '/api/preview'
     | '/api/proxy-download'
+    | '/blog/$slug'
     | '/docs/api'
     | '/products/$productId'
+    | '/blog/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/disclaimer'
     | '/downloader'
+    | '/privacy'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/api/download'
     | '/api/preview'
     | '/api/proxy-download'
+    | '/blog/$slug'
     | '/docs/api'
     | '/products/$productId'
+    | '/blog'
   id:
     | '__root__'
     | '/'
+    | '/blog'
+    | '/disclaimer'
     | '/downloader'
+    | '/privacy'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/api/download'
     | '/api/preview'
     | '/api/proxy-download'
+    | '/blog/$slug'
     | '/docs/api'
     | '/products/$productId'
+    | '/blog/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BlogRoute: typeof BlogRouteWithChildren
+  DisclaimerRoute: typeof DisclaimerRoute
   DownloaderRoute: typeof DownloaderRoute
+  PrivacyRoute: typeof PrivacyRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiDownloadRoute: typeof ApiDownloadRoute
   ApiPreviewRoute: typeof ApiPreviewRoute
   ApiProxyDownloadRoute: typeof ApiProxyDownloadRoute
@@ -123,11 +210,46 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/downloader': {
       id: '/downloader'
       path: '/downloader'
       fullPath: '/downloader'
       preLoaderRoute: typeof DownloaderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/disclaimer': {
+      id: '/disclaimer'
+      path: '/disclaimer'
+      fullPath: '/disclaimer'
+      preLoaderRoute: typeof DisclaimerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -136,6 +258,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/blog/': {
+      id: '/blog/'
+      path: '/'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof BlogRoute
     }
     '/products/$productId': {
       id: '/products/$productId'
@@ -150,6 +279,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/docs/api'
       preLoaderRoute: typeof DocsApiRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof BlogRoute
     }
     '/api/proxy-download': {
       id: '/api/proxy-download'
@@ -175,9 +311,26 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface BlogRouteChildren {
+  BlogSlugRoute: typeof BlogSlugRoute
+  BlogIndexRoute: typeof BlogIndexRoute
+}
+
+const BlogRouteChildren: BlogRouteChildren = {
+  BlogSlugRoute: BlogSlugRoute,
+  BlogIndexRoute: BlogIndexRoute,
+}
+
+const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BlogRoute: BlogRouteWithChildren,
+  DisclaimerRoute: DisclaimerRoute,
   DownloaderRoute: DownloaderRoute,
+  PrivacyRoute: PrivacyRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiDownloadRoute: ApiDownloadRoute,
   ApiPreviewRoute: ApiPreviewRoute,
   ApiProxyDownloadRoute: ApiProxyDownloadRoute,

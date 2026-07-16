@@ -148,3 +148,56 @@ code {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Long-form blog typography */
+.blog-prose {
+  color: #4b5563;
+  font-size: 1rem;
+  line-height: 1.85;
+  margin-top: 2.5rem;
+}
+
+.blog-prose h2 {
+  color: #111827;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.35;
+  margin: 2.5rem 0 0.85rem;
+}
+
+.blog-prose p,
+.blog-prose ul,
+.blog-prose ol {
+  margin: 0.9rem 0;
+}
+
+.blog-prose ul,
+.blog-prose ol {
+  padding-left: 1.5rem;
+}
+
+.blog-prose ul { list-style: disc; }
+.blog-prose ol { list-style: decimal; }
+.blog-prose li { margin: 0.4rem 0; }
+
+.blog-prose a {
+  color: #c2410c;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-color: #fed7aa;
+  text-underline-offset: 3px;
+}
+
+.blog-prose a:hover {
+  color: #9a3412;
+  text-decoration-color: #fb923c;
+}
+
+.blog-prose code {
+  background: #f3f4f6;
+  border-radius: 0.35rem;
+  color: #374151;
+  font-size: 0.9em;
+  padding: 0.15rem 0.35rem;
+}

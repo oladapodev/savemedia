@@ -1,0 +1,18 @@
+appId: com.imediasave.app
+name: Settings persist after process restart
+tags:
+  - deterministic
+---
+- launchApp:
+    clearState: true
+- assertVisible: Before your first download
+- tapOn: I understand and accept
+- tapOn: Settings
+- assertVisible: Default quality
+- assertVisible: Balanced
+- tapOn: Change default quality
+- assertVisible: Original
+- killApp
+- launchApp:
+    stopApp: false
+- assertVisible: Original

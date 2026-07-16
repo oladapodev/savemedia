@@ -18,15 +18,27 @@ jobs:
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
         with:
-          bun-version: latest
+          bun-version: 1.3.14
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Validate workspace
+        run: bun run check:workspace
+
       - name: Lint and typecheck
         run: bun run check
 
+      - name: Check Expo app
+        run: bun run mobile:doctor
+
+      - name: Inspect Expo configuration
+        working-directory: mobile
+        run: bunx expo config --type public --json > /tmp/imediasave-expo-config.json
+
       - name: Build web app
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
         run: bun run build
 
       - name: Build API image
@@ -34,3 +46,37 @@ jobs:
 
       - name: Build web image
         run: docker build -t imediasave-web:test -f web/Dockerfile .
+
+  android-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    needs: verify
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.14
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate Android project
+        working-directory: mobile
+        run: bunx expo prebuild --platform android --clean --no-install
+
+      - name: Run Android module tests
+        working-directory: mobile/android
+        run: >-
+          ./gradlew
+          :imediasave-download:testDebugUnitTest
+          --no-daemon
