@@ -5,6 +5,9 @@ This repo is set up for two-service deployment on Google Cloud Run:
 - `imediasave-api` runs the private cobalt processing service from the workspace root `Dockerfile`.
 - `imediasave-web` runs the TanStack Start app from `web/Dockerfile`.
 
+Both images install workspace dependencies from `bun.lock`. The Expo app in `mobile/` is
+built separately with EAS and is not deployed to Cloud Run.
+
 ## Expected secrets
 
 - `imediasave-cobalt-runtime`
