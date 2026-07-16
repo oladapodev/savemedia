@@ -5,8 +5,9 @@
   "scripts": {
     "dev": "vite dev --port 3000",
     "build": "vite build",
+    "content": "bun ../scripts/content.ts",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "bun run content && tsc --noEmit",
     "test": "bun test",
     "check": "bun run lint && bun run typecheck && bun run test",
     "preview": "vite preview",
