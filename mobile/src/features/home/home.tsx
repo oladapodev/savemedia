@@ -66,6 +66,12 @@ export const downloadingHomeModel: HomeScreenModel = {
   statusText: 'Download in progress',
 };
 
+function downloadDebug(event: string, details?: Record<string, unknown>) {
+  if (process.env.NODE_ENV === 'test') return;
+  if (details) console.log(`[iMediaSave][home] ${event}`, details);
+  else console.log(`[iMediaSave][home] ${event}`);
+}
+
 type HomeScreenProps = {
   model: HomeScreenModel;
   onChooseMedia?: (selection: DownloadSelection) => void;
@@ -133,17 +139,27 @@ export function HomeScreen({
   const [draftUrl, setDraftUrl] = useState('');
 
   const handlePaste = async () => {
+    downloadDebug('paste button clicked');
     try {
       const clipboard = await (require('expo-clipboard') as typeof import('expo-clipboard')).getStringAsync();
+      downloadDebug('clipboard read complete', { length: clipboard.length });
       setDraftUrl(clipboard);
-    } catch {
+    } catch (error) {
+      downloadDebug('clipboard read failed', {
+        message: error instanceof Error ? error.message : 'unknown',
+      });
       setDraftUrl('');
     }
   };
 
   const handleSubmit = () => {
     const url = draftUrl.trim();
-    if (!url) return;
+    downloadDebug('download link clicked', { hasUrl: Boolean(url), urlLength: url.length });
+    if (!url) {
+      downloadDebug('download link ignored because the field is empty');
+      return;
+    }
+    downloadDebug('submitting url to route');
     void onSubmitUrl?.(url);
   };
 

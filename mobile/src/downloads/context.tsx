@@ -290,6 +290,12 @@ function providerUnmountedError(): Error {
   return new Error('Download provider unmounted before initialization completed.');
 }
 
+function downloadDebug(event: string, details?: Record<string, unknown>) {
+  if (process.env.NODE_ENV === 'test') return;
+  if (details) console.log(`[iMediaSave][downloads] ${event}`, details);
+  else console.log(`[iMediaSave][downloads] ${event}`);
+}
+
 function isFailedPhase(phase: InitializationPhase): boolean {
   return phase === 'failed';
 }
@@ -574,6 +580,7 @@ export function DownloadProvider({
   }, [initializationRetrying, startInitialization]);
 
   const pasteAndDownload = useCallback(async (): Promise<PasteAndDownloadResult> => {
+    downloadDebug('pasteAndDownload start');
     try {
       await requireOwnershipAcceptance();
       if (!mountedRef.current) throw providerUnmountedError();
@@ -581,24 +588,36 @@ export function DownloadProvider({
         ? await dependencies.clipboard.getStringAsync()
         : await (require('expo-clipboard') as typeof import('expo-clipboard')).getStringAsync();
       if (!mountedRef.current) throw providerUnmountedError();
+      downloadDebug('pasteAndDownload clipboard read complete', { length: text.length });
       lastClipboardText.current = text;
-      return await applyStartResult(await controller.startFromText(text, settingsRef.current.quality));
+      const result = await controller.startFromText(text, settingsRef.current.quality);
+      downloadDebug('pasteAndDownload controller complete', { kind: result.kind, jobStatus: result.job?.status });
+      return await applyStartResult(result);
     } catch (error) {
+      downloadDebug('pasteAndDownload failed', {
+        message: error instanceof Error ? error.message : 'unknown',
+      });
       if (mountedRef.current) setHomeTransient({ kind: 'error', message: errorMessage(error, 'Clipboard download failed.') });
       return { kind: 'action_failed' };
     }
   }, [applyStartResult, controller, dependencies.clipboard, requireOwnershipAcceptance]);
 
   const startSharedUrl = useCallback(async (url: string): Promise<StartResult> => {
+    downloadDebug('startSharedUrl start', { urlLength: url.length });
     await requireOwnershipAcceptance();
     if (!mountedRef.current) throw providerUnmountedError();
-    return applyStartResult(await controller.startFromText(url, settingsRef.current.quality));
+    const result = await controller.startFromText(url, settingsRef.current.quality);
+    downloadDebug('startSharedUrl controller complete', { kind: result.kind, jobStatus: result.job?.status });
+    return applyStartResult(result);
   }, [applyStartResult, controller, requireOwnershipAcceptance]);
 
   const saveSharedFiles = useCallback(async (sharedFiles: readonly DirectMediaInput[]): Promise<StartResult> => {
+    downloadDebug('saveSharedFiles start', { count: sharedFiles.length });
     await requireOwnershipAcceptance();
     if (!mountedRef.current) throw providerUnmountedError();
-    return applyStartResult(await controller.startFromDirectFiles(sharedFiles));
+    const result = await controller.startFromDirectFiles(sharedFiles);
+    downloadDebug('saveSharedFiles controller complete', { kind: result.kind, jobStatus: result.job?.status });
+    return applyStartResult(result);
   }, [applyStartResult, controller, requireOwnershipAcceptance]);
 
   const discardIncomingShare = useCallback(async (uris: readonly string[]): Promise<void> => {
