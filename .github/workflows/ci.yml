@@ -76,4 +76,9 @@ jobs:
 
       - name: Run Android module tests and lint
         working-directory: mobile/android
-        run: ./gradlew testDebugUnitTest lintDebug --no-daemon
+        run: >-
+          ./gradlew
+          :imediasave-download:testDebugUnitTest
+          :imediasave-download:lintDebug
+          :app:lintDebug
+          --no-daemon
