@@ -3,6 +3,7 @@ package com.imediasave.download
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.Operation
 import androidx.work.WorkManager
 import org.junit.Assert.assertEquals
@@ -22,11 +23,12 @@ class DownloadSchedulerTest {
   fun `enqueue uses job-scoped unique KEEP work with a connected network constraint`() {
     val manager = mock(WorkManager::class.java)
     val operation = mock(Operation::class.java)
+    val fallbackRequest = OneTimeWorkRequestBuilder<DownloadWorker>().build()
     val anyName = org.mockito.ArgumentMatchers.anyString()
     val anyPolicy = org.mockito.ArgumentMatchers.any(ExistingWorkPolicy::class.java)
       ?: ExistingWorkPolicy.KEEP
     val anyRequest = org.mockito.ArgumentMatchers.any(OneTimeWorkRequest::class.java)
-      ?: mock(OneTimeWorkRequest::class.java)
+      ?: fallbackRequest
     `when`(manager.enqueueUniqueWork(
       anyName,
       anyPolicy,
