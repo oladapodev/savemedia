@@ -36,6 +36,7 @@ export const Route = createRootRoute({
         rel: 'stylesheet',
         href: 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap',
       },
+      { rel: 'icon', href: '/favicon.ico' },
     ],
   }),
   component: RootComponent,
@@ -47,6 +48,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <meta name="google-adsense-account" content="ca-pub-2179313175656611" />
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2179313175656611"
+          crossOrigin="anonymous"
+        ></script>
       </head>
       <body>
         {children}
@@ -66,7 +73,7 @@ function RootComponent() {
               <Download className="w-4.5 h-4.5 text-white" />
             </div>
             <span className="text-lg font-bold text-gray-900 tracking-tight" style={{ fontFamily: "'Poppins', sans-serif" }}>
-              Save<span className="text-orange-500">Media</span>
+              iMedia<span className="text-orange-500">Save</span>
             </span>
           </Link>
           <div className="flex items-center gap-1">
