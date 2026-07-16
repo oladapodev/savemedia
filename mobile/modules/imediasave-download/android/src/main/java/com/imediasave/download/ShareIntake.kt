@@ -20,7 +20,10 @@ object SharePolicy {
   const val MAX_TEXT_CHARS = 8_192
   const val MAX_NAME_CHARS = 1_024
 
-  fun validMime(mimeType: String) = DownloadPolicy.isSupportedMime(mimeType)
+  fun validMime(mimeType: String): Boolean {
+    val normalized = DownloadPolicy.normalizeMime(mimeType) ?: return false
+    return DownloadPolicy.mediaType(normalized) == "image" || DownloadPolicy.mediaType(normalized) == "video"
+  }
   fun validSize(size: Long) = size in 1..MAX_ITEM_BYTES
   fun withinCopyCeiling(bytes: Long) = bytes <= MAX_ITEM_BYTES
   fun mediaTypeForIntent(mimeType: String?): String? = when (mimeType?.substringBefore(';')?.trim()?.lowercase()) {
@@ -257,6 +260,7 @@ class ShareIntake(
   private fun metadata(uri: Uri): ShareMetadata {
     if (uri.scheme != "content") throw ShareFailure("inaccessible_file")
     val mimeType = DownloadPolicy.normalizeMime(context.contentResolver.getType(uri))
+      ?.takeIf(SharePolicy::validMime)
       ?: throw ShareFailure("unsupported_mime")
     var name: String? = null
     var size: Long? = null
