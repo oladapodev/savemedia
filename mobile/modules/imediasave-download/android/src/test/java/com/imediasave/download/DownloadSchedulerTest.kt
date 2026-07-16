@@ -22,10 +22,15 @@ class DownloadSchedulerTest {
   fun `enqueue uses job-scoped unique KEEP work with a connected network constraint`() {
     val manager = mock(WorkManager::class.java)
     val operation = mock(Operation::class.java)
+    val anyName = org.mockito.ArgumentMatchers.anyString()
+    val anyPolicy = org.mockito.ArgumentMatchers.any(ExistingWorkPolicy::class.java)
+      ?: ExistingWorkPolicy.KEEP
+    val anyRequest = org.mockito.ArgumentMatchers.any(OneTimeWorkRequest::class.java)
+      ?: mock(OneTimeWorkRequest::class.java)
     `when`(manager.enqueueUniqueWork(
-      org.mockito.ArgumentMatchers.anyString(),
-      org.mockito.ArgumentMatchers.any(),
-      org.mockito.ArgumentMatchers.any(OneTimeWorkRequest::class.java),
+      anyName,
+      anyPolicy,
+      anyRequest,
     )).thenReturn(operation)
     val scheduler = DownloadScheduler(manager) { 123L }
 
