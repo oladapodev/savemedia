@@ -1,0 +1,25 @@
+appId: com.imediasave.app
+name: Remove history without deleting saved media
+tags:
+  - staging
+env:
+  TEST_MEDIA_URL: ${TEST_MEDIA_URL}
+---
+- launchApp:
+    clearState: true
+    permissions:
+      notifications: allow
+      photos: allow
+- tapOn: I understand and accept
+- setClipboard: ${TEST_MEDIA_URL}
+- tapOn: Paste & download
+- extendedWaitUntil:
+    visible: Download complete
+    timeout: 120000
+- tapOn: History
+- tapOn: Select downloads
+- tapOn:
+    text: Select .*
+    index: 0
+- tapOn: Remove selected from history
+- assertVisible: Nothing saved yet

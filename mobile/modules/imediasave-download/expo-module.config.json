@@ -1,0 +1,10 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["DownloadModule"],
+    "appDelegateSubscribers": ["DownloadBackgroundSessionHandler"]
+  },
+  "android": {
+    "modules": ["com.imediasave.download.DownloadModule"]
+  }
+}
