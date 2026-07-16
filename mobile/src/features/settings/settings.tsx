@@ -34,11 +34,21 @@ type SettingsScreenProps = {
   onLegalPress?: () => void;
   onNotificationsChange?: (value: boolean) => void;
   onPrivacyPress?: () => void;
-  onQualityPress?: () => void;
+  onQualityChange?: (value: 'balanced' | 'original' | 'audio') => void;
   onSaveLocationPress?: () => void;
   onSmartAutoSaveChange?: (value: boolean) => void;
   settings: SettingsModel;
 };
+
+const qualityOptions: Array<{
+  description: string;
+  label: SettingsModel['quality'];
+  value: 'balanced' | 'original' | 'audio';
+}> = [
+  { description: 'Balanced default for most saves.', label: 'Balanced', value: 'balanced' },
+  { description: 'Prefer the original upload quality.', label: 'Original', value: 'original' },
+  { description: 'Extract audio only.', label: 'Audio', value: 'audio' },
+];
 
 function Section({ children, title }: { children: React.ReactNode; title: string }) {
   return (
@@ -58,7 +68,7 @@ export function SettingsScreen({
   onLegalPress,
   onNotificationsChange,
   onPrivacyPress,
-  onQualityPress,
+  onQualityChange,
   onSaveLocationPress,
   onSmartAutoSaveChange,
   settings,
@@ -76,14 +86,19 @@ export function SettingsScreen({
         <Section title="DOWNLOADS">
           <SettingRow
             control={(
-              <Button
-                accessibilityLabel="Change default quality"
-                label="Change"
-                onPress={onQualityPress}
-                variant="secondary"
-              />
+              <Stack gap="xs">
+                {qualityOptions.map((option) => (
+                  <Button
+                    accessibilityState={{ selected: settings.quality === option.label }}
+                    key={option.value}
+                    label={option.label}
+                    onPress={() => onQualityChange?.(option.value)}
+                    variant={settings.quality === option.label ? 'primary' : 'secondary'}
+                  />
+                ))}
+              </Stack>
             )}
-            description="A reliable 1080p or 720p result when available."
+            description="Pick the default quality once instead of cycling through it."
             title="Default quality"
             value={settings.quality}
           />

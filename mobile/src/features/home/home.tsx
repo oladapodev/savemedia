@@ -1,4 +1,8 @@
+import { useState } from 'react';
+import { TextInput } from 'react-native';
+
 import {
+  Button,
   Icon,
   Inline,
   PageHeader,
@@ -7,6 +11,7 @@ import {
   Stack,
   Surface,
   Text,
+  useTheme,
   type ButtonVariant,
 } from '../../ui';
 import { DownloadCard } from './download-card';
@@ -66,6 +71,7 @@ type HomeScreenProps = {
   onChooseMedia?: (selection: DownloadSelection) => void;
   onPrimaryAction?: () => void;
   onSecondaryAction?: () => void;
+  onSubmitUrl?: (url: string) => Promise<void> | void;
 };
 
 export function ProgressCard({ progress }: { progress: number }) {
@@ -121,7 +127,26 @@ export function HomeScreen({
   onChooseMedia,
   onPrimaryAction,
   onSecondaryAction,
+  onSubmitUrl,
 }: HomeScreenProps) {
+  const { colors } = useTheme();
+  const [draftUrl, setDraftUrl] = useState('');
+
+  const handlePaste = async () => {
+    try {
+      const clipboard = await (require('expo-clipboard') as typeof import('expo-clipboard')).getStringAsync();
+      setDraftUrl(clipboard);
+    } catch {
+      setDraftUrl('');
+    }
+  };
+
+  const handleSubmit = () => {
+    const url = draftUrl.trim();
+    if (!url) return;
+    void onSubmitUrl?.(url);
+  };
+
   return (
     <Screen scroll>
       <Stack gap="lg">
@@ -133,6 +158,44 @@ export function HomeScreen({
           <Text variant="caption">
             Save only content you own or have permission to download.
           </Text>
+        </Surface>
+        <Surface level="raised" padding="lg">
+          <Stack gap="md">
+            <Stack gap="xs">
+              <Text variant="label">Paste link</Text>
+              <Text color="textMuted" variant="caption">
+                Paste a public link or type one directly, then use the download button below.
+              </Text>
+            </Stack>
+            <Inline gap="sm" wrap>
+              <TextInput
+                autoCapitalize="none"
+                autoCorrect={false}
+                placeholder="Paste a public link"
+                placeholderTextColor={colors.textMuted}
+                style={{
+                  backgroundColor: colors.surface,
+                  borderColor: colors.border,
+                  borderRadius: 14,
+                  borderWidth: 1,
+                  color: colors.text,
+                  flex: 1,
+                  minHeight: 52,
+                  minWidth: 180,
+                  paddingHorizontal: 16,
+                  paddingVertical: 12,
+                }}
+                value={draftUrl}
+                onChangeText={setDraftUrl}
+              />
+              <Button label="Paste" onPress={handlePaste} variant="secondary" />
+            </Inline>
+            <Button
+              disabled={!draftUrl.trim()}
+              label="Download link"
+              onPress={handleSubmit}
+            />
+          </Stack>
         </Surface>
         <DownloadCard
           model={model}

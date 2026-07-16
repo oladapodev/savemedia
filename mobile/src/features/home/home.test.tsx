@@ -22,7 +22,10 @@ test('home presents one primary paste action with honest support and legal copy'
   );
 
   expect(screen.getByRole('header', { name: 'iMediaSave' })).toBeTruthy();
-  expect(screen.getAllByRole('button')).toHaveLength(1);
+  expect(screen.getAllByRole('button')).toHaveLength(3);
+  expect(screen.getByPlaceholderText('Paste a public link')).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Paste' })).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Download link' })).toBeTruthy();
   expect(screen.getByRole('button', { name: 'Paste & download' })).toBeTruthy();
   expect(
     screen.getByText('Popular platforms and compatible public links.'),
@@ -31,6 +34,18 @@ test('home presents one primary paste action with honest support and legal copy'
     screen.getByText('Save only content you own or have permission to download.'),
   ).toBeTruthy();
   expect(screen.getByText('Ready to download')).toBeTruthy();
+});
+
+test('home exposes a visible link field for manual pastes', async () => {
+  await render(
+    <TestApp>
+      <HomeScreen model={readyHomeModel} />
+    </TestApp>,
+  );
+
+  expect(screen.getByPlaceholderText('Paste a public link')).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Paste' })).toBeTruthy();
+  expect(screen.getByRole('button', { name: 'Download link' })).toBeTruthy();
 });
 
 test('home exposes determinate progress with icon-independent status text', async () => {
