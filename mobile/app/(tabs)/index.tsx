@@ -4,6 +4,11 @@ import { HomeScreen } from '../../src/features/home/home';
 export default function HomeRoute() {
   const downloads = useDownloads();
   const { home } = downloads;
+  const runAction = (action: () => Promise<unknown> | void) => {
+    try {
+      void Promise.resolve(action()).catch(() => undefined);
+    } catch {}
+  };
 
   const primary = () => {
     if (home.phase === 'ready' || home.phase === 'link_detected') return downloads.pasteAndDownload();
@@ -24,9 +29,13 @@ export default function HomeRoute() {
   return (
     <HomeScreen
       model={home}
-      onChooseMedia={async (selection) => { if (home.jobId) await downloads.chooseMedia(home.jobId, selection); }}
-      onPrimaryAction={async () => { await primary(); }}
-      onSecondaryAction={async () => { await secondary(); }}
+      onChooseMedia={(selection) => {
+        const jobId = home.jobId;
+        if (jobId) runAction(() => downloads.chooseMedia(jobId, selection));
+      }}
+      onPrimaryAction={() => { runAction(primary); }}
+      onSecondaryAction={() => { runAction(secondary); }}
+      onSubmitUrl={(url) => { runAction(() => downloads.startSharedUrl(url)); }}
     />
   );
 }

@@ -1,16 +1,30 @@
 import { fireEvent, render, userEvent } from '@testing-library/react-native';
+import { Text } from 'react-native';
 
 import { AppThemeProvider } from '../ui';
 
 const mockPasteAndDownload = jest.fn();
+const mockStartSharedUrl = jest.fn().mockResolvedValue(undefined);
 const mockDeleteHistory = jest.fn().mockResolvedValue({ deletedIds: ['one'], failures: [] });
 const mockUpdateSettings = jest.fn().mockResolvedValue(undefined);
 const mockCleanupTemporary = jest.fn().mockResolvedValue(undefined);
 const mockRequestSaveLocationAccess = jest.fn().mockResolvedValue(undefined);
 const mockPush = jest.fn();
+let capturedHomeProps: {
+  onPrimaryAction?: () => void;
+  onSecondaryAction?: () => void;
+  onSubmitUrl?: (url: string) => Promise<void> | void;
+} | null = null;
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: mockPush }),
+}));
+
+jest.mock('../../src/features/home/home', () => ({
+  HomeScreen: (props: unknown) => {
+    capturedHomeProps = props as typeof capturedHomeProps;
+    return <Text>home</Text>;
+  },
 }));
 
 jest.mock('./context', () => ({
@@ -33,7 +47,7 @@ jest.mock('./context', () => ({
     chooseMedia: jest.fn(), cancel: jest.fn(), retry: jest.fn(), deleteHistory: mockDeleteHistory, updateSettings: mockUpdateSettings,
     downloadAgain: jest.fn(), cleanupTemporary: mockCleanupTemporary,
     requestSaveLocationAccess: mockRequestSaveLocationAccess,
-    share: jest.fn(), open: jest.fn(),
+    share: jest.fn(), open: jest.fn(), startSharedUrl: mockStartSharedUrl,
   }),
 }));
 
@@ -46,11 +60,24 @@ async function renderRoute(Route: React.ComponentType) {
 }
 
 beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  capturedHomeProps = null;
+});
 
 test('thin Home route renders the live provider model and dispatches paste intent', async () => {
   const view = await renderRoute(HomeRoute);
-  await userEvent.setup().press(view.getByRole('button', { name: 'Paste & download' }));
+  expect(view.getByText('home')).toBeTruthy();
+  expect(capturedHomeProps?.onPrimaryAction?.()).toBeUndefined();
   expect(mockPasteAndDownload).toHaveBeenCalledTimes(1);
+});
+
+test('thin Home route ignores provider-unmounted submit rejections', async () => {
+  mockStartSharedUrl.mockRejectedValueOnce(new Error('Download provider unmounted before initialization completed.'));
+  const view = await renderRoute(HomeRoute);
+  expect(view.getByText('home')).toBeTruthy();
+
+  expect(capturedHomeProps?.onSubmitUrl?.('https://example.com/shared')).toBeUndefined();
+  expect(mockStartSharedUrl).toHaveBeenCalledWith('https://example.com/shared');
 });
 
 test('thin History route dispatches an explicit live deletion choice', async () => {

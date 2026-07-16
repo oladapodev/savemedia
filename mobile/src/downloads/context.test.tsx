@@ -366,6 +366,44 @@ test('rejects pending ownership waiters on unmount without continuing shared URL
   await start;
 }, 10_000);
 
+test('does not log a provider error when initialization is interrupted during settings load', async () => {
+  const settingsRead = deferred<{
+    quality: 'balanced' | 'original' | 'audio';
+    smartAutoSave: boolean;
+    alerts: boolean;
+    allowCellular: boolean;
+    themeMode: 'system' | 'light' | 'dark';
+    metadataVersion: number;
+    metadata: Record<string, unknown>;
+  }>();
+  mockRepositories.settings.get = jest.fn().mockImplementation(() => settingsRead.promise);
+  const consoleError = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+  const { DownloadProvider } = loadContext();
+  const view = await render(
+    <DownloadProvider dependencies={{ background, clipboard, files, network, notifications: { complete: jest.fn() } }}>
+      <Text>consumer</Text>
+    </DownloadProvider>,
+  );
+
+  expect(mockRepositories.settings.get).toHaveBeenCalledTimes(1);
+  await act(async () => { view.unmount(); });
+  settingsRead.resolve({
+    quality: 'balanced',
+    smartAutoSave: true,
+    alerts: true,
+    allowCellular: true,
+    themeMode: 'system',
+    metadataVersion: 1,
+    metadata: {},
+  });
+  await act(async () => { await Promise.resolve(); });
+
+  expect(consoleError).not.toHaveBeenCalledWith(
+    expect.stringContaining('Download provider unmounted before initialization completed.'),
+  );
+  consoleError.mockRestore();
+}, 10_000);
+
 test('does not start clipboard processing when the provider unmounts during the clipboard read', async () => {
   const clipboardRead = deferred<string>();
   const delayedClipboard = { getStringAsync: jest.fn(() => clipboardRead.promise) };
