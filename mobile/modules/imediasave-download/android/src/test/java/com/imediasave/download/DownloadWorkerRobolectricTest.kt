@@ -84,7 +84,7 @@ class DownloadWorkerRobolectricTest {
     assertTrue(fixture.reporter.progress.any {
       it.getLong(DownloadWorker.KEY_BYTES_WRITTEN, -1) == body.size.toLong()
     })
-    finalFile.delete()
+    assertTrue(finalFile.delete())
   }
 
   @Test
