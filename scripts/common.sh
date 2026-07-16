@@ -4,19 +4,16 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 NODE_BIN="${NODE_BIN:-$(command -v node || true)}"
-if [[ -z "$NODE_BIN" ]]; then
-  NODE_BIN="$HOME/.nvm/versions/node/v24.13.0/bin/node"
+if [[ -z "$NODE_BIN" && -d "$HOME/.nvm/versions/node" ]]; then
+  NODE_BIN="$(find "$HOME/.nvm/versions/node" -path '*/bin/node' -type f -print 2>/dev/null | sort -V | tail -n 1)"
 fi
-NODE_DIR="${NODE_DIR:-$(dirname "$NODE_BIN")}"
-NPM_BIN="${NPM_BIN:-$(command -v npm || true)}"
-if [[ -z "$NPM_BIN" ]]; then
-  NPM_BIN="$NODE_DIR/npm"
-fi
+NODE_DIR="${NODE_DIR:-$(dirname "${NODE_BIN:-/usr/bin/node}")}"
 BUN_BIN="${BUN_BIN:-$(command -v bun || true)}"
 if [[ -z "$BUN_BIN" ]]; then
   BUN_BIN="$HOME/.bun/bin/bun"
 fi
-PNPM_STANDALONE_BIN="${PNPM_STANDALONE_BIN:-$HOME/.local/share/pnpm/.tools/pnpm-exe/10.33.0/pnpm}"
+BUN_DIR="${BUN_DIR:-$(dirname "$BUN_BIN")}"
+TURBO_BIN="${TURBO_BIN:-$ROOT_DIR/node_modules/.bin/turbo}"
 GCLOUD_BIN="${GCLOUD_BIN:-$(command -v gcloud || true)}"
 GH_BIN="${GH_BIN:-$(command -v gh || true)}"
 PROJECT_ID="${PROJECT_ID:-$(gcloud config get-value project 2>/dev/null || true)}"
@@ -32,7 +29,7 @@ API_COOKIES_SECRET_NAME="${API_COOKIES_SECRET_NAME:-imediasave-api-cookies}"
 API_PUBLIC_URL="${API_PUBLIC_URL:-}"
 WEB_PUBLIC_URL="${WEB_PUBLIC_URL:-}"
 
-export PATH="$NODE_DIR:$PATH"
+export PATH="$BUN_DIR:$NODE_DIR:$PATH"
 
 require_binary() {
   local path="$1"
@@ -54,9 +51,15 @@ run_node() {
   "$NODE_BIN" "$@"
 }
 
-run_npm() {
-  require_binary "$NPM_BIN" "npm"
-  "$NPM_BIN" "$@"
+run_turbo() {
+  require_binary "$TURBO_BIN" "turbo"
+  run_bun "$TURBO_BIN" "$@"
+}
+
+exec_turbo() {
+  require_binary "$BUN_BIN" "bun"
+  require_binary "$TURBO_BIN" "turbo"
+  exec "$BUN_BIN" "$TURBO_BIN" "$@"
 }
 
 run_gcloud() {
