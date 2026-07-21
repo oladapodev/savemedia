@@ -1,5 +1,10 @@
 # Mobile Hero and Motion Design
 
+> [!NOTE]
+> This document may not reflect the current implementation.
+> See the final report for up-to-date state:
+> [Final Report](../reports/mobile-hero-motion.md)
+
 ## [S1] Visual direction
 
 The Home screen will return to the older orange-led composition without restoring its crowding. A rounded orange hero will contain a centered official logo tile, concise white brand copy, and a white link form that overlaps the hero’s lower edge. Benefits remain unfilled and lightweight, with color applied only to their icons.
