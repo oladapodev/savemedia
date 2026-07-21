@@ -25,13 +25,13 @@ function isMediaType(value: unknown): value is MediaType {
   return value === 'video' || value === 'audio' || value === 'image';
 }
 
-function previewMediaType(value: unknown): MediaType | undefined {
+function previewMediaType(value: unknown, platform: string): MediaType | undefined {
   if (isMediaType(value)) return value;
   if (typeof value !== 'string') return undefined;
   const normalized = value.toLowerCase();
   if (/\b(photo|image|picture)\b/u.test(normalized)) return 'image';
   if (/\b(audio|sound)\b/u.test(normalized)) return 'audio';
-  if (/\b(video|rich)\b/u.test(normalized)) return 'video';
+  if (/\bvideo\b/u.test(normalized) || (normalized === 'rich' && platform.toLowerCase() === 'tiktok')) return 'video';
   return undefined;
 }
 
@@ -102,7 +102,7 @@ function classifyWrapperFailure(
 function parsePreview(body: unknown): PreviewResult | null {
   if (!isRecord(body) || body.success !== true) return null;
   if (typeof body.platform !== 'string' || typeof body.url !== 'string') return null;
-  const mediaType = previewMediaType(body.type);
+  const mediaType = previewMediaType(body.type, body.platform);
   return {
     kind: 'preview',
     platform: body.platform,
