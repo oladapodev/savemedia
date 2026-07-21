@@ -9,5 +9,5 @@ export { EmptyState, type EmptyStateProps } from './empty-state';
 export { Icon, iconStrokeWidth, type IconName } from './icon';
 export { ProgressBar } from './progress';
 export { MediaThumbnail } from './media-thumbnail';
-export { AnimatedFocus, MotionPressable, Reveal, capRevealDelay, isMotionDisabled, resolveMotion, useMotionDisabled } from './motion';
+export { AnimatedFocus, MotionPressable, Reveal, capRevealDelay, getRevealInitialProgress, isMotionDisabled, resolveMotion, useMotionDisabled } from './motion';
 export { elevation, motion, radius, space, type } from './tokens';

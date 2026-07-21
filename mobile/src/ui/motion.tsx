@@ -24,7 +24,11 @@ export function capRevealDelay(delay: number) {
   return Math.max(0, Math.min(delay, 40));
 }
 
-export function useMotionDisabled() {
+export function getRevealInitialProgress(disabled: boolean, resolved: boolean) {
+  return resolved && disabled ? 1 : 0;
+}
+
+function useMotionPreference() {
   const [reduceMotion, setReduceMotion] = useState<boolean | null>(null);
   const [screenReader, setScreenReader] = useState<boolean | null>(null);
 
@@ -50,7 +54,14 @@ export function useMotionDisabled() {
     };
   }, []);
 
-  return isMotionDisabled(reduceMotion, screenReader);
+  return {
+    disabled: isMotionDisabled(reduceMotion, screenReader),
+    resolved: reduceMotion !== null && screenReader !== null,
+  };
+}
+
+export function useMotionDisabled() {
+  return useMotionPreference().disabled;
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
@@ -80,16 +91,18 @@ export function Reveal({ children, delay = 0, distance, style }: PropsWithChildr
   distance?: number;
   style?: StyleProp<ViewStyle>;
 }>) {
-  const motionDisabled = useMotionDisabled();
-  const progress = useRef(new Animated.Value(motionDisabled ? 1 : 0)).current;
+  const { disabled: motionDisabled, resolved } = useMotionPreference();
+  const progress = useRef(new Animated.Value(getRevealInitialProgress(motionDisabled, resolved))).current;
   const policy = resolveMotion(motionDisabled);
   const travel = distance ?? policy.decorativeDistance;
 
   useEffect(() => {
+    if (!resolved) return undefined;
     if (motionDisabled) {
       progress.setValue(1);
       return undefined;
     }
+    progress.setValue(0);
     const animation = Animated.timing(progress, {
       delay: capRevealDelay(delay),
       duration: policy.stateDuration,
@@ -99,7 +112,7 @@ export function Reveal({ children, delay = 0, distance, style }: PropsWithChildr
     });
     animation.start();
     return () => animation.stop();
-  }, [delay, motionDisabled, policy.stateDuration, progress]);
+  }, [delay, motionDisabled, policy.stateDuration, progress, resolved]);
 
   return <Animated.View style={[{ opacity: progress, transform: [{ translateY: progress.interpolate({
     inputRange: [0, 1], outputRange: [travel, 0],
