@@ -35,6 +35,7 @@ export default function HistoryRoute() {
         router.push(`/media/${item.id}`);
       }}
       onRetryItem={(item) => { runAction(() => downloads.retry(item.id)); }}
+      onRefreshThumbnail={(item) => { runAction(() => downloads.refreshHistoryThumbnail(item.id)); }}
       onSelect={() => {
         setSelecting((value) => !value);
         setSelectedIds([]);

@@ -53,6 +53,7 @@ jest.mock('./context', () => ({
     pasteAndDownload: mockPasteAndDownload,
     chooseMedia: jest.fn(), cancel: jest.fn(), retry: jest.fn(), deleteHistory: mockDeleteHistory, updateSettings: mockUpdateSettings,
     downloadAgain: jest.fn(), cleanupTemporary: mockCleanupTemporary,
+    refreshHistoryThumbnail: jest.fn(),
     requestSaveLocationAccess: mockRequestSaveLocationAccess,
     share: jest.fn(), open: jest.fn(), startSharedUrl: mockStartSharedUrl,
   }),

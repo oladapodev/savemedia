@@ -12,10 +12,11 @@ export type HistoryItemModel = {
 type Filter = 'All' | 'Videos' | 'Images' | 'Audio';
 
 export function HistoryScreen({ items, notice, onDeleteSelected, onOpenItem, onRetryItem, onSelect, onShareItem, onToggleItem,
-  selectedIds = [], selecting = false }: {
+  onRefreshThumbnail, selectedIds = [], selecting = false }: {
   items: HistoryItemModel[]; notice?: string; onDeleteSelected?: (ids: string[], choice: HistoryDeleteChoice) => void;
   onOpenItem?: (item: HistoryItemModel) => void; onRetryItem?: (item: HistoryItemModel) => void; onSelect?: () => void;
-  onShareItem?: (item: HistoryItemModel) => void; onToggleItem?: (item: HistoryItemModel) => void; selectedIds?: string[]; selecting?: boolean;
+  onRefreshThumbnail?: (item: HistoryItemModel) => void; onShareItem?: (item: HistoryItemModel) => void;
+  onToggleItem?: (item: HistoryItemModel) => void; selectedIds?: string[]; selecting?: boolean;
 }) {
   const { colors } = useTheme();
   const [filter, setFilter] = useState<Filter>('All');
@@ -46,6 +47,7 @@ export function HistoryScreen({ items, notice, onDeleteSelected, onOpenItem, onR
       : Object.entries(groups).map(([date, group]) => <Stack gap="sm" key={date}><Text variant="label">{date}</Text>
         <Surface accessibilityLabel={`${date} downloads`} padding="md">{group.map((item, index) =>
           <HistoryItem item={item} key={item.id} last={index === group.length - 1} onOpen={onOpenItem} onRetry={onRetryItem}
-            onShare={onShareItem} onToggle={onToggleItem} selected={selectedIds.includes(item.id)} selecting={selecting} />)}</Surface></Stack>)}
+            onRefreshThumbnail={onRefreshThumbnail} onShare={onShareItem} onToggle={onToggleItem}
+            selected={selectedIds.includes(item.id)} selecting={selecting} />)}</Surface></Stack>)}
   </Stack></Screen>;
 }

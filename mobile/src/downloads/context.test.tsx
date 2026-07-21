@@ -730,6 +730,37 @@ test('exposes serializable live models and repository-backed settings, deletion,
   expect(files.deleteAsset).toHaveBeenCalledWith('ph://one');
 });
 
+test('refreshes an expired persisted thumbnail from its original source URL', async () => {
+  mockRepositories.history.list = jest.fn().mockResolvedValue([{
+    id: 'history-refresh', sourceUrl: 'https://x.com/creator/status/1', mediaIdentity: 'twitter:1',
+    platform: 'twitter', thumbnailUrl: 'https://app.example/api/thumbnail?expired=1', filename: 'post.mp4',
+    mimeType: 'video/mp4', sizeBytes: 2048, status: 'saved', createdAt: 100, completedAt: 200,
+    quality: 'balanced', deviceAssetRef: 'ph://post', metadataVersion: 1, metadata: { mediaType: 'video' },
+  }]);
+  const api = {
+    preview: jest.fn().mockResolvedValue({
+      kind: 'preview', platform: 'twitter', url: 'https://x.com/creator/status/1',
+      thumbnail: 'https://app.example/api/thumbnail?fresh=1',
+    }),
+    download: jest.fn(),
+  } as const;
+  const { DownloadProvider, useDownloads } = loadContext();
+  let context!: ReturnType<typeof useDownloads>;
+  function Consumer() { context = useDownloads(); return <Text>{context.history.items[0]?.thumbnailUrl ?? 'loading'}</Text>; }
+
+  await render(
+    <DownloadProvider dependencies={{ api, background, clipboard, files, network, notifications: { complete: jest.fn() } }}>
+      <Consumer />
+    </DownloadProvider>,
+  );
+  await waitFor(() => expect(context.history.items).toHaveLength(1));
+
+  await runIntent(() => context.refreshHistoryThumbnail('history-refresh'));
+
+  expect(api.preview).toHaveBeenCalledWith('https://x.com/creator/status/1');
+  await waitFor(() => expect(context.history.items[0]?.thumbnailUrl).toBe('https://app.example/api/thumbnail?fresh=1'));
+});
+
 test('turns invalid clipboard and canonical duplicate results into visible actions without rereading Clipboard', async () => {
   clipboard.getStringAsync
     .mockResolvedValueOnce('not a link')

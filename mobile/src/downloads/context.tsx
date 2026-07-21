@@ -73,6 +73,7 @@ export type DownloadContextValue = {
   cancel(jobId: string): Promise<void>;
   retry(jobId: string): ReturnType<DownloadController['retry']>;
   deleteHistory(ids: string[], choice: HistoryDeleteChoice): Promise<DeleteHistoryOutcome>;
+  refreshHistoryThumbnail(id: string): Promise<void>;
   updateSettings(patch: Partial<Pick<Settings, 'quality' | 'smartAutoSave' | 'alerts' | 'allowCellular' | 'themeMode'>>): Promise<void>;
   cleanupTemporary(): Promise<void>;
   requestSaveLocationAccess(): Promise<void>;
@@ -126,7 +127,7 @@ function settingsModel(settings: Settings, notice?: string): SettingsModel {
   };
 }
 
-function historyModel(entry: HistoryEntry): HistoryItemModel {
+function historyModel(entry: HistoryEntry, thumbnailUrl?: string): HistoryItemModel {
   const media = entry.mimeType.startsWith('image/')
     ? 'Image'
     : entry.mimeType.startsWith('audio/') ? 'Audio' : 'Video';
@@ -140,7 +141,7 @@ function historyModel(entry: HistoryEntry): HistoryItemModel {
     dateLabel: entry.completedAt ? new Date(entry.completedAt).toLocaleDateString() : 'Pending',
     status: entry.status === 'failed' ? 'Failed' : 'Saved',
     mediaType: media.toLowerCase() as 'video' | 'image' | 'audio',
-    ...(entry.thumbnailUrl ? { thumbnailUrl: entry.thumbnailUrl } : {}),
+    ...(thumbnailUrl || entry.thumbnailUrl ? { thumbnailUrl: thumbnailUrl || entry.thumbnailUrl! } : {}),
     ...(entry.deviceAssetRef ? { assetUri: entry.deviceAssetRef } : {}),
     sourceUrl: entry.sourceUrl,
     quality,
@@ -380,6 +381,9 @@ export function DownloadProvider({
   });
   const [settings, setSettings] = useState<Settings>(settingsRef.current);
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
+  const entriesRef = useRef<HistoryEntry[]>([]);
+  const [thumbnailOverrides, setThumbnailOverrides] = useState<Record<string, string>>({});
+  const refreshingThumbnailsRef = useRef(new Set<string>());
   const [jobs, setJobs] = useState<DownloadJob[]>([]);
   const [terminalJobs, setTerminalJobs] = useState<DownloadJob[]>([]);
   const [preview, setPreview] = useState<(MediaDetailModel & { sourceUrl: string }) | null>(null);
@@ -400,6 +404,10 @@ export function DownloadProvider({
   const initializationRunRef = useRef<Promise<void> | null>(null);
   const settingsWriteQueueRef = useRef<Promise<void>>(Promise.resolve());
   const acceptanceInFlightRef = useRef(false);
+
+  useEffect(() => {
+    entriesRef.current = entries;
+  }, [entries]);
 
   const api = useMemo(
     () => dependencies.api ?? createApi({
@@ -771,6 +779,26 @@ export function DownloadProvider({
     }
   }, [controller, requireOwnershipAcceptance]);
 
+  const refreshHistoryThumbnail = useCallback(async (id: string) => {
+    if (refreshingThumbnailsRef.current.has(id)) return;
+    const entry = entries.find((candidate) => candidate.id === id);
+    if (!entry) return;
+    refreshingThumbnailsRef.current.add(id);
+    try {
+      const result = await api.preview(entry.sourceUrl);
+      const entryStillExists = entriesRef.current.some((candidate) => (
+        candidate.id === id && candidate.sourceUrl === entry.sourceUrl
+      ));
+      if (mountedRef.current && entryStillExists && result.kind === 'preview' && result.thumbnail) {
+        setThumbnailOverrides((current) => ({ ...current, [id]: result.thumbnail! }));
+      }
+    } catch {
+      // Keep the neutral artwork when a refresh cannot reach the preview service.
+    } finally {
+      refreshingThumbnailsRef.current.delete(id);
+    }
+  }, [api, entries]);
+
   const deleteHistory = useCallback(async (ids: string[], choice: HistoryDeleteChoice): Promise<DeleteHistoryOutcome> => {
     const outcome: DeleteHistoryOutcome = { deletedIds: [], failures: [] };
     let unexpectedNotice: string | undefined;
@@ -818,7 +846,13 @@ export function DownloadProvider({
       }
     }
     if (mountedRef.current) {
-      if (outcome.deletedIds.length) setEntries((current) => current.filter(({ id }) => !outcome.deletedIds.includes(id)));
+      if (outcome.deletedIds.length) {
+        entriesRef.current = entriesRef.current.filter(({ id }) => !outcome.deletedIds.includes(id));
+        setEntries(entriesRef.current);
+        setThumbnailOverrides((current) => Object.fromEntries(
+          Object.entries(current).filter(([id]) => !outcome.deletedIds.includes(id)),
+        ));
+      }
       setHistoryNotice(unexpectedNotice ?? (outcome.failures.length ? `${outcome.failures.length} item could not be removed.` : undefined));
     }
     return outcome;
@@ -863,7 +897,8 @@ export function DownloadProvider({
     home: homeModel(jobs, homeTransient),
     downloads: { items: jobs.map(activeDownloadModel).filter((item): item is ActiveDownloadItemModel => Boolean(item)) },
     history: {
-      items: [...entries.map(historyModel), ...terminalJobs.map(terminalHistoryModel).filter((item): item is HistoryItemModel => Boolean(item))],
+      items: [...entries.map((entry) => historyModel(entry, thumbnailOverrides[entry.id])),
+        ...terminalJobs.map(terminalHistoryModel).filter((item): item is HistoryItemModel => Boolean(item))],
       ...(historyNotice ? { notice: historyNotice } : {}),
     },
     preview,
@@ -880,6 +915,7 @@ export function DownloadProvider({
     cancel,
     retry,
     deleteHistory,
+    refreshHistoryThumbnail,
     updateSettings,
     cleanupTemporary,
     requestSaveLocationAccess,
@@ -893,7 +929,7 @@ export function DownloadProvider({
         if (mountedRef.current) setHistoryNotice(error instanceof Error ? error.message : 'The saved file could not be opened.');
       }
     },
-  }), [cancel, chooseMedia, cleanupTemporary, confirmPreview, deleteHistory, discardIncomingShare, downloadAgain, entries, files, historyNotice, homeTransient, inspectUrl, jobs, pasteAndDownload, preview, requestSaveLocationAccess, retry, saveSharedFiles, settings, settingsNotice, startSharedUrl, terminalJobs, updateSettings]);
+  }), [cancel, chooseMedia, cleanupTemporary, confirmPreview, deleteHistory, discardIncomingShare, downloadAgain, entries, files, historyNotice, homeTransient, inspectUrl, jobs, pasteAndDownload, preview, refreshHistoryThumbnail, requestSaveLocationAccess, retry, saveSharedFiles, settings, settingsNotice, startSharedUrl, terminalJobs, thumbnailOverrides, updateSettings]);
 
   return (
     <AppThemeProvider mode={settings.themeMode}>

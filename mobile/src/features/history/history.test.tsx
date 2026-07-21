@@ -1,4 +1,4 @@
-import { render, screen, userEvent } from '@testing-library/react-native';
+import { act, render, screen, userEvent } from '@testing-library/react-native';
 
 import { AppThemeProvider } from '../../ui';
 import { HistoryScreen, type HistoryItemModel } from './history';
@@ -70,6 +70,17 @@ test('history items remain operable by name without relying on their thumbnails'
 
 test('history shows a saved thumbnail when one is available', async () => {
   await render(<TestApp><HistoryScreen items={[{ ...item, thumbnailUrl: 'https://images.example/summer.jpg' }]} /></TestApp>);
+  expect(screen.getByLabelText('Summer reel thumbnail')).toBeTruthy();
+});
+
+test('history requests refreshed artwork when a signed thumbnail fails', async () => {
+  const onRefreshThumbnail = jest.fn();
+  const user = userEvent.setup();
+  const withThumbnail = { ...item, thumbnailUrl: 'https://app.example/api/thumbnail?expired=1' };
+  await render(<TestApp><HistoryScreen items={[withThumbnail]} onRefreshThumbnail={onRefreshThumbnail} /></TestApp>);
+  await act(async () => { screen.getByLabelText('Summer reel thumbnail').props.onError(); });
+  expect(onRefreshThumbnail).toHaveBeenCalledWith(withThumbnail);
+  await user.press(screen.getByRole('button', { name: 'Retry Summer reel thumbnail' }));
   expect(screen.getByLabelText('Summer reel thumbnail')).toBeTruthy();
 });
 
