@@ -1,7 +1,7 @@
 import { blogPosts } from '@/data/blogPosts'
 import { absoluteUrl } from '@/lib/site'
 
-const staticPages = ['/', '/downloader', '/docs/api', '/blog', '/privacy', '/disclaimer']
+const staticPages = ['/', '/downloader', '/docs/api', '/blog', '/help', '/contact', '/privacy', '/disclaimer']
 
 function escapeXml(value: string) {
   return value.replace(/[<>&'"]/g, (character) => ({
@@ -15,7 +15,7 @@ function escapeXml(value: string) {
 export function buildSitemapXml() {
   const staticEntries = staticPages.map((path) => ({
     location: absoluteUrl(path),
-    lastModified: '2026-07-13',
+    lastModified: '2026-07-19',
   }))
   const articleEntries = blogPosts.map((post) => ({
     location: absoluteUrl(`/blog/${post.slug}`),

@@ -1,44 +1,77 @@
-import { SymbolView, type SymbolViewProps } from 'expo-symbols';
-import { View } from 'react-native';
+import {
+  Bell,
+  Bolt,
+  Check,
+  Download,
+  Globe,
+  History,
+  House,
+  Image as ImageIcon,
+  Info,
+  Link as LinkIcon,
+  Lock,
+  Palette,
+  Pause,
+  Play,
+  Search,
+  Settings,
+  Share2,
+  Sparkles,
+  Trash2,
+  TriangleAlert,
+  X,
+  type LucideIcon,
+  type LucideProps,
+} from 'lucide-react-native';
 
 import { type ThemeColor } from './tokens';
 import { useTheme } from './theme';
 
-const symbols = {
-  check: { ios: 'checkmark', android: 'check' },
-  close: { ios: 'xmark', android: 'close' },
-  download: { ios: 'arrow.down.circle', android: 'download' },
-  history: { ios: 'clock.arrow.circlepath', android: 'history' },
-  home: { ios: 'house', android: 'home' },
-  info: { ios: 'info.circle', android: 'info' },
-  settings: { ios: 'gearshape', android: 'settings' },
-  share: { ios: 'square.and.arrow.up', android: 'share' },
-  trash: { ios: 'trash', android: 'delete' },
-  warning: { ios: 'exclamationmark.triangle', android: 'warning' },
-} as const satisfies Record<string, SymbolViewProps['name']>;
+const icons = {
+  bolt: Bolt,
+  bell: Bell,
+  check: Check,
+  image: ImageIcon,
+  link: LinkIcon,
+  lock: Lock,
+  globe: Globe,
+  palette: Palette,
+  pause: Pause,
+  play: Play,
+  sparkle: Sparkles,
+  close: X,
+  download: Download,
+  history: History,
+  home: House,
+  info: Info,
+  settings: Settings,
+  search: Search,
+  share: Share2,
+  trash: Trash2,
+  warning: TriangleAlert,
+} as const satisfies Record<string, LucideIcon>;
 
-export type IconName = keyof typeof symbols;
+export const iconStrokeWidth = 1.8;
 
-export type IconProps = Omit<
-  SymbolViewProps,
-  'colors' | 'fallback' | 'name' | 'tintColor'
-> & {
+export type IconName = keyof typeof icons;
+
+export type IconProps = Omit<LucideProps, 'color'> & {
   color?: ThemeColor;
   name: IconName;
 };
 
 export function Icon({ color = 'text', name, size = 24, ...props }: IconProps) {
   const { colors } = useTheme();
+  const LucideIconComponent = icons[name];
 
   return (
-    <SymbolView
+    <LucideIconComponent
       {...props}
       accessibilityElementsHidden
-      fallback={<View style={{ height: size, width: size }} />}
+      color={colors[color]}
       importantForAccessibility="no-hide-descendants"
-      name={symbols[name]}
       size={size}
-      tintColor={colors[color]}
+      strokeWidth={iconStrokeWidth}
     />
   );
 }

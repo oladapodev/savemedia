@@ -8,6 +8,8 @@ const navigation = [
   { label: 'Home', to: '/' as const },
   { label: 'Downloader', to: '/downloader' as const },
   { label: 'API Docs', to: '/docs/api' as const },
+  { label: 'Help Center', to: '/help' as const },
+  { label: 'Contact Us', to: '/contact' as const },
   { label: 'Privacy Policy', to: '/privacy' as const },
   { label: 'Disclaimer', to: '/disclaimer' as const },
 ]

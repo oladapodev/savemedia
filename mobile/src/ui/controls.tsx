@@ -1,11 +1,11 @@
 import {
-  Pressable,
   type PressableProps,
   Switch,
   type SwitchProps,
 } from 'react-native';
 
 import { Text } from './text';
+import { MotionPressable } from './motion';
 import { useTheme } from './theme';
 import { space } from './tokens';
 
@@ -15,7 +15,7 @@ type TextLinkProps = Omit<PressableProps, 'children'> & {
 
 export function TextLink({ label, style, ...props }: TextLinkProps) {
   return (
-    <Pressable
+    <MotionPressable
       {...props}
       accessibilityLabel={label}
       accessibilityRole="link"
@@ -33,7 +33,7 @@ export function TextLink({ label, style, ...props }: TextLinkProps) {
       <Text color="accent" variant="label">
         {label}
       </Text>
-    </Pressable>
+    </MotionPressable>
   );
 }
 

@@ -35,6 +35,46 @@ describe('public iMediaSave API client', () => {
     expect(result).toMatchObject({ kind: 'preview', platform: 'instagram', title: 'Reel' });
   });
 
+  test('preview accepts provider-specific oEmbed types and keeps its thumbnail', async () => {
+    const thumbnail = 'https://cdn.example.com/poster.jpg';
+    const result = await createApi({
+      baseUrl: 'https://app.example',
+      fetcher: jest.fn().mockResolvedValue(jsonResponse({
+        success: true,
+        platform: 'tiktok',
+        url: 'https://tiktok.com/@creator/video/1',
+        title: 'Creator video',
+        thumbnail,
+        type: 'rich',
+      })),
+    }).preview('https://tiktok.com/@creator/video/1');
+
+    expect(result).toMatchObject({ kind: 'preview', mediaType: 'video', thumbnail, title: 'Creator video' });
+  });
+
+  test('preview normalizes provider names before interpreting provider-specific types', async () => {
+    const result = await createApi({
+      baseUrl: 'https://app.example',
+      fetcher: jest.fn().mockResolvedValue(jsonResponse({
+        success: true,
+        platform: 'TikTok',
+        url: 'https://tiktok.com/@creator/video/2',
+        type: 'RICH',
+      })),
+    }).preview('https://tiktok.com/@creator/video/2');
+
+    expect(result).toMatchObject({ kind: 'preview', mediaType: 'video', platform: 'TikTok' });
+  });
+
+  test('preview does not classify a generic rich X post as video', async () => {
+    const result = await createApi({
+      baseUrl: 'https://app.example',
+      fetcher: jest.fn().mockResolvedValue(jsonResponse({ success: true, platform: 'twitter', url: 'https://x.com/user/status/1', type: 'rich' })),
+    }).preview('https://x.com/user/status/1');
+    expect(result).toMatchObject({ kind: 'preview', platform: 'twitter' });
+    expect(result).not.toHaveProperty('mediaType');
+  });
+
   test('maps a direct download response without accepting cobalt fields', async () => {
     const result = await createApi({
       baseUrl: 'http://localhost:3000',

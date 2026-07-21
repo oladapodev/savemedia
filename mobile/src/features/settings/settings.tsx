@@ -1,200 +1,72 @@
-import {
-  Button,
-  PageHeader,
-  Screen,
-  Stack,
-  Text,
-  Toggle,
-} from '../../ui';
+import { ChoiceBar, Icon, Inline, PageHeader, Screen, Stack, Surface, Text, Toggle, type IconName } from '../../ui';
 import { SettingRow } from './row';
 
 export type SettingsModel = {
-  allowCellular: boolean;
-  appVersion: string;
-  notifications: boolean;
-  quality: 'Balanced' | 'Original' | 'Audio';
-  saveLocation: string;
-  smartAutoSave: boolean;
-  notice?: string;
+  allowCellular: boolean; appVersion: string; notifications: boolean; quality: 'Balanced' | 'Original' | 'Audio';
+  saveLocation: string; smartAutoSave: boolean; themeMode: 'system' | 'light' | 'dark'; notice?: string;
 };
-
 export const defaultSettings: SettingsModel = {
-  allowCellular: true,
-  appVersion: '1.0.0',
-  notifications: true,
-  quality: 'Balanced',
-  saveLocation: 'Photos & media library',
-  smartAutoSave: true,
+  allowCellular: true, appVersion: '1.0.0', notifications: true, quality: 'Balanced', saveLocation: 'Gallery', smartAutoSave: true, themeMode: 'system',
 };
-
-type SettingsScreenProps = {
-  onAllowCellularChange?: (value: boolean) => void;
-  onClearHistory?: () => void;
-  onClearTemporaryFiles?: () => void;
-  onLegalPress?: () => void;
-  onNotificationsChange?: (value: boolean) => void;
-  onPrivacyPress?: () => void;
-  onQualityChange?: (value: 'balanced' | 'original' | 'audio') => void;
-  onSaveLocationPress?: () => void;
-  onSmartAutoSaveChange?: (value: boolean) => void;
-  settings: SettingsModel;
-};
-
-const qualityOptions: Array<{
-  description: string;
-  label: SettingsModel['quality'];
-  value: 'balanced' | 'original' | 'audio';
-}> = [
-  { description: 'Balanced default for most saves.', label: 'Balanced', value: 'balanced' },
-  { description: 'Prefer the original upload quality.', label: 'Original', value: 'original' },
-  { description: 'Extract audio only.', label: 'Audio', value: 'audio' },
-];
+type Quality = 'balanced' | 'original' | 'audio';
 
 function Section({ children, title }: { children: React.ReactNode; title: string }) {
-  return (
-    <Stack gap="sm">
-      <Text color="textMuted" variant="label">
-        {title}
-      </Text>
-      {children}
-    </Stack>
-  );
+  return <Stack gap="sm"><Text color="textMuted" variant="label">{title}</Text><Surface style={{ paddingBottom: 0, paddingTop: 0 }}>{children}</Surface></Stack>;
 }
 
-export function SettingsScreen({
-  onAllowCellularChange,
-  onClearHistory,
-  onClearTemporaryFiles,
-  onLegalPress,
-  onNotificationsChange,
-  onPrivacyPress,
-  onQualityChange,
-  onSaveLocationPress,
-  onSmartAutoSaveChange,
-  settings,
-}: SettingsScreenProps) {
-  return (
-    <Screen scroll>
-      <Stack gap="xl">
-        <PageHeader
-          subtitle="Choose how downloads are saved on this device."
-          title="Settings"
-        />
+function Preference({ children, icon, testID, title, value }: { children: React.ReactNode; icon: IconName; testID: string; title: string; value: string }) {
+  return <Stack gap="sm" testID={testID} style={{ paddingBottom: 14, paddingTop: 12 }}>
+    <Inline gap="md"><Icon color="textMuted" name={icon} size={20} /><Text style={{ flex: 1 }} variant="label">{title}</Text><Text color="textMuted" variant="caption">{value}</Text></Inline>
+    {children}
+  </Stack>;
+}
 
-        {settings.notice ? <Text color="textMuted">{settings.notice}</Text> : null}
-
-        <Section title="DOWNLOADS">
-          <SettingRow
-            control={(
-              <Stack gap="xs">
-                {qualityOptions.map((option) => (
-                  <Button
-                    accessibilityState={{ selected: settings.quality === option.label }}
-                    key={option.value}
-                    label={option.label}
-                    onPress={() => onQualityChange?.(option.value)}
-                    variant={settings.quality === option.label ? 'primary' : 'secondary'}
-                  />
-                ))}
-              </Stack>
-            )}
-            description="Pick the default quality once instead of cycling through it."
-            title="Default quality"
-            value={settings.quality}
-          />
-          <SettingRow
-            control={(
-              <Toggle
-                label="Smart auto-save"
-                onValueChange={onSmartAutoSaveChange}
-                value={settings.smartAutoSave}
-              />
-            )}
-            description="Start clear, unambiguous shared links automatically."
-            title="Smart auto-save"
-          />
-          <SettingRow
-            control={(
-              <Toggle
-                label="Completion notifications"
-                onValueChange={onNotificationsChange}
-                value={settings.notifications}
-              />
-            )}
-            description="Let me know when media is available on the device."
-            title="Completion notifications"
-          />
-          <SettingRow
-            control={(
-              <Toggle
-                label="Download over cellular"
-                onValueChange={onAllowCellularChange}
-                value={settings.allowCellular}
-              />
-            )}
-            title="Download over cellular"
-          />
-        </Section>
-
-        <Section title="STORAGE & HISTORY">
-          <SettingRow
-            title="Save location"
-            value={settings.saveLocation}
-            control={(
-              <Button
-                accessibilityLabel="Manage save location access"
-                label="Manage"
-                onPress={onSaveLocationPress}
-                variant="secondary"
-              />
-            )}
-          />
-          <SettingRow
-            description="Remove leftover working files without touching saved media."
-            title="Temporary files"
-            control={(
-              <Button
-                accessibilityLabel="Clear temporary files"
-                label="Clear"
-                onPress={onClearTemporaryFiles}
-                variant="secondary"
-              />
-            )}
-          />
-          <SettingRow
-            description="History is kept until you choose to remove it."
-            title="Download history"
-            control={(
-              <Button
-                accessibilityLabel="Clear download history"
-                label="Clear"
-                onPress={onClearHistory}
-                variant="danger"
-              />
-            )}
-          />
-        </Section>
-
-        <Section title="PRIVACY & ABOUT">
-          <SettingRow
-            accessibilityLabel="Open Privacy Policy"
-            description="How the app handles links, files, device data, and permissions."
-            onPress={onPrivacyPress}
-            title="Privacy"
-          />
-          <SettingRow
-            accessibilityLabel="Open Disclaimer"
-            description="Responsible use, rights, platform terms, and service limits."
-            onPress={onLegalPress}
-            title="Legal"
-          />
-          <SettingRow
-            description="Help is not available because no support contact is configured in this app."
-            title="Help"
-          />
-          <SettingRow title="App version" value={settings.appVersion} />
-        </Section>
-      </Stack>
-    </Screen>
-  );
+export function SettingsScreen({ settings, onAllowCellularChange, onClearHistory, onClearTemporaryFiles, onContactPress, onHelpPress,
+  onLegalPress, onNotificationsChange, onPrivacyPress, onQualityChange, onRatePress, onSaveLocationPress, onShareAppPress,
+  onSmartAutoSaveChange, onThemeChange }: {
+  settings: SettingsModel; onAllowCellularChange?: (value: boolean) => void; onClearHistory?: () => void; onClearTemporaryFiles?: () => void;
+  onContactPress?: () => void; onHelpPress?: () => void; onLegalPress?: () => void; onNotificationsChange?: (value: boolean) => void;
+  onPrivacyPress?: () => void; onQualityChange?: (value: Quality) => void; onRatePress?: () => void; onSaveLocationPress?: () => void;
+  onShareAppPress?: () => void; onSmartAutoSaveChange?: (value: boolean) => void; onThemeChange?: (value: SettingsModel['themeMode']) => void;
+}) {
+  return <Screen edges={['top', 'left', 'right']} scroll><Stack gap="xl"><PageHeader subtitle="Choose how iMediaSave works on this device" title="Settings" />
+    {settings.notice ? <Text color="textMuted">{settings.notice}</Text> : null}
+    <Section title="GENERAL">
+      <Preference icon="palette" testID="theme-preference" title="Theme" value={settings.themeMode === 'system' ? 'System' : settings.themeMode === 'light' ? 'Light' : 'Dark'}>
+        <ChoiceBar accessibilityLabel="Theme choices" choices={[
+          { label: 'System', value: 'system' }, { label: 'Light', value: 'light' }, { label: 'Dark', value: 'dark' },
+        ]} onChange={(mode) => onThemeChange?.(mode)} value={settings.themeMode} />
+      </Preference>
+      <SettingRow icon="globe" title="Language" value="English" />
+    </Section>
+    <Section title="DOWNLOADS">
+      <Preference icon="download" testID="quality-preference" title="Download quality" value={settings.quality}>
+        <ChoiceBar accessibilityLabel="Download quality choices" choices={[
+          { label: 'Balanced', value: 'balanced' }, { label: 'Original', value: 'original' }, { label: 'Audio', value: 'audio' },
+        ]} onChange={(quality) => onQualityChange?.(quality)} value={settings.quality.toLowerCase() as Quality} />
+      </Preference>
+      <SettingRow accessibilityLabel="Manage save location access" icon="image" onPress={onSaveLocationPress} title="Save to" value={settings.saveLocation} />
+      <SettingRow control={<Toggle label="Smart auto-save" onValueChange={onSmartAutoSaveChange} value={settings.smartAutoSave} />}
+        description="Start links shared into iMediaSave automatically." icon="bolt" title="Auto download" />
+      <SettingRow control={<Toggle label="Download over cellular" onValueChange={onAllowCellularChange} value={settings.allowCellular} />}
+        icon="globe" title="Download over cellular" />
+      <SettingRow control={<Toggle label="Completion notifications" onValueChange={onNotificationsChange} value={settings.notifications} />}
+        icon="bell" title="Notifications" />
+    </Section>
+    {onClearTemporaryFiles || onClearHistory ? <Section title="STORAGE">
+      {onClearTemporaryFiles ? <SettingRow accessibilityLabel="Clear temporary files" icon="trash" onPress={onClearTemporaryFiles} title="Clear temporary files" /> : null}
+      {onClearHistory ? <SettingRow accessibilityLabel="Clear download history" icon="history" onPress={onClearHistory} title="Clear download history" /> : null}
+    </Section> : null}
+    {onHelpPress || onContactPress || onRatePress || onShareAppPress ? <Section title="SUPPORT">
+      {onHelpPress ? <SettingRow icon="info" onPress={onHelpPress} title="Help Center" /> : null}
+      {onContactPress ? <SettingRow icon="globe" onPress={onContactPress} title="Contact Us" /> : null}
+      {onRatePress ? <SettingRow icon="sparkle" onPress={onRatePress} title="Rate iMediaSave" /> : null}
+      {onShareAppPress ? <SettingRow icon="share" onPress={onShareAppPress} title="Share iMediaSave" /> : null}
+    </Section> : null}
+    <Section title="PRIVACY & ABOUT">
+      {onPrivacyPress ? <SettingRow accessibilityLabel="Open Privacy Policy" icon="lock" onPress={onPrivacyPress} title="Privacy Policy" /> : null}
+      {onLegalPress ? <SettingRow accessibilityLabel="Open Disclaimer" icon="info" onPress={onLegalPress} title="Disclaimer" /> : null}
+      <SettingRow icon="info" title="App version" value={settings.appVersion} />
+    </Section>
+  </Stack></Screen>;
 }

@@ -1,5 +1,10 @@
 # Mobile Downloader Implementation Plan
 
+> [!NOTE]
+> This document may not reflect the current implementation.
+> See the final report for up-to-date state:
+> [Final Report](../reports/mobile-ui-redesign.md)
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use compose:subagent (recommended) or compose:execute to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Build the approved component-based iMediaSave downloader for Android and iOS with paste/share intake, balanced downloads, device saving, local history, notifications, and native background execution.

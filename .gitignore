@@ -43,6 +43,7 @@ reference/
 CLAUDE.local.md
 foo.css
 .compose/
+.worktrees/
 /app.json
 /download
 web/.content-collections/
