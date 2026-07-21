@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AccessibilityInfo, FlatList, Image, Pressable, View, useWindowDimensions, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
+import { AccessibilityInfo, FlatList, Image, View, useWindowDimensions, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 
-import { Icon, Inline, Stack, radius, space, useTheme } from '../../ui';
+import { AnimatedFocus, Icon, Inline, MotionPressable, Stack, radius, space, useTheme } from '../../ui';
 
 export type PromoSlide = { id: string; image: number; label: string };
 
@@ -93,17 +93,17 @@ export function PromoCarousel({ autoAdvanceMs = 4_000, slides = promoSlides }: {
         resizeMode="cover" source={item.image} style={{ borderRadius: radius.card, height: frame.height, width: frame.width }} /></View>}
       style={{ borderRadius: radius.card, height: frame.height, width: frame.width }} />
     <Inline gap={0} justify="center">
-      {slides.map((slide, index) => <Pressable accessibilityLabel={`Show promotion ${index + 1}`} accessibilityRole="button"
+      {slides.map((slide, index) => <MotionPressable accessibilityLabel={`Show promotion ${index + 1}`} accessibilityRole="button"
         accessibilityState={{ selected: index === active }} key={slide.id} onPress={() => show(index)}
         hitSlop={6} style={{ alignItems: 'center', height: 32, justifyContent: 'center', width: 32 }}>
-        <View pointerEvents="none" style={{ backgroundColor: index === active ? colors.accent : colors.border,
-          borderRadius: 99, height: 7, width: index === active ? 20 : 7 }} />
-      </Pressable>)}
-      {slides.length > 1 && !motionBlocked ? <Pressable accessibilityLabel={paused ? 'Resume promotions' : 'Pause promotions'}
+        <AnimatedFocus active={index === active}><View pointerEvents="none" style={{ backgroundColor: index === active ? colors.accent : colors.border,
+          borderRadius: 99, height: 7, width: index === active ? 20 : 7 }} /></AnimatedFocus>
+      </MotionPressable>)}
+      {slides.length > 1 && !motionBlocked ? <MotionPressable accessibilityLabel={paused ? 'Resume promotions' : 'Pause promotions'}
         accessibilityRole="button" hitSlop={6} onPress={() => setPaused((value) => !value)}
         style={{ alignItems: 'center', height: 32, justifyContent: 'center', width: 32 }}>
         <Icon color="textMuted" name={paused ? 'play' : 'pause'} size={15} />
-      </Pressable> : null}
+      </MotionPressable> : null}
     </Inline>
   </Stack>;
 }

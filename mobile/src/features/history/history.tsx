@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Pressable, TextInput } from 'react-native';
+import { TextInput } from 'react-native';
 import { Button, ChoiceBar, EmptyState, Icon, Inline, PageHeader, Screen, Stack, Surface, Text, radius, useTheme } from '../../ui';
 import { HistoryItem } from './item';
 import type { HistoryDeleteChoice } from '../../history/delete';

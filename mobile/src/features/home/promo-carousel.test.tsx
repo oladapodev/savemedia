@@ -28,7 +28,7 @@ test('carousel exposes the five supplied promotions and pagination controls', as
   expect(screen.getByLabelText('One link, endless possibilities')).toBeTruthy();
   expect(screen.getByLabelText('Clean downloads without watermarks or ads')).toBeTruthy();
   expect(screen.getByLabelText('Download from social media in one place')).toBeTruthy();
-  expect(screen.getByRole('button', { name: 'Show promotion 1' }).props.accessibilityState).toEqual({ selected: true });
+  expect(screen.getByRole('button', { name: 'Show promotion 1' }).props.accessibilityState).toEqual(expect.objectContaining({ selected: true }));
   expect(screen.getByRole('button', { name: 'Show promotion 5' })).toBeTruthy();
 });
 
@@ -36,7 +36,7 @@ test('carousel advances its selected dot automatically', async () => {
   jest.useFakeTimers();
   await render(<TestApp />);
   await act(async () => { jest.advanceTimersByTime(4_000); });
-  expect(screen.getByRole('button', { name: 'Show promotion 2' }).props.accessibilityState).toEqual({ selected: true });
+  expect(screen.getByRole('button', { name: 'Show promotion 2' }).props.accessibilityState).toEqual(expect.objectContaining({ selected: true }));
 });
 
 test('carousel dots navigate directly', async () => {

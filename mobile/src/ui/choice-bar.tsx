@@ -1,5 +1,6 @@
-import { Pressable, View, useWindowDimensions } from 'react-native';
+import { View, useWindowDimensions } from 'react-native';
 
+import { MotionPressable } from './motion';
 import { radius, space } from './tokens';
 import { Text } from './text';
 import { useTheme } from './theme';
@@ -52,7 +53,7 @@ export function ChoiceBar<Value extends string>({ accessibilityLabel, choices, o
       {choices.map((choice) => {
         const selected = choice.value === value;
         return (
-          <Pressable
+          <MotionPressable
             accessibilityLabel={choice.accessibilityLabel ?? choice.label}
             accessibilityRole="button"
             accessibilityState={{ selected }}
@@ -82,7 +83,7 @@ export function ChoiceBar<Value extends string>({ accessibilityLabel, choices, o
             >
               {choice.label}
             </Text>
-          </Pressable>
+          </MotionPressable>
         );
       })}
     </View>

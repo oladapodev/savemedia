@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Pressable, View, type StyleProp, type ViewStyle } from 'react-native';
+import { ActivityIndicator, Image, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { Icon, type IconName } from './icon';
+import { MotionPressable } from './motion';
 import { radius } from './tokens';
 import { useTheme } from './theme';
 
@@ -30,10 +31,10 @@ export function MediaThumbnail({ fallbackIcon = 'image', label, onError, style, 
     style={[{ alignItems: 'center', backgroundColor: colors.surfaceMuted, borderRadius: radius.control,
       justifyContent: 'center', overflow: 'hidden' }, style]}>
     {loading && !failed ? <ActivityIndicator color={colors.accent} size="small" /> : null}
-    {failed && uri ? <Pressable accessibilityLabel={`Retry ${label}`} accessibilityRole="button" onPress={retry}
+    {failed && uri ? <MotionPressable accessibilityLabel={`Retry ${label}`} accessibilityRole="button" onPress={retry}
       style={{ alignItems: 'center', bottom: 0, justifyContent: 'center', left: 0, position: 'absolute', right: 0, top: 0 }}>
       <Icon color="textMuted" name={fallbackIcon} size={26} />
-    </Pressable> : null}
+    </MotionPressable> : null}
     {!uri ? <Icon color="textMuted" name={fallbackIcon} size={26} /> : null}
     {uri && !failed ? <Image accessibilityLabel={label} accessibilityRole="image"
       onError={() => { setFailed(true); setLoading(false); onError?.(); }} onLoadEnd={() => setLoading(false)}

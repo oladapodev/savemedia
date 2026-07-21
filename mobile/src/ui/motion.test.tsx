@@ -1,10 +1,16 @@
 import { render, screen } from '@testing-library/react-native';
 
-import { MotionPressable, Reveal, resolveMotion } from './motion';
+import { isMotionDisabled, MotionPressable, Reveal, resolveMotion } from './motion';
 
 test('motion policy keeps feedback short and removes decorative motion when requested', () => {
   expect(resolveMotion(false)).toEqual({ feedbackDuration: 120, stateDuration: 220, decorativeDistance: 10 });
   expect(resolveMotion(true)).toEqual({ feedbackDuration: 0, stateDuration: 0, decorativeDistance: 0 });
+});
+
+test('either accessibility preference independently disables decorative motion', () => {
+  expect(isMotionDisabled(true, false)).toBe(true);
+  expect(isMotionDisabled(false, true)).toBe(true);
+  expect(isMotionDisabled(false, false)).toBe(false);
 });
 
 test('motion primitives preserve accessible controls and content', async () => {

@@ -16,8 +16,13 @@ export function resolveMotion(disabled: boolean) {
   return disabled ? motion.reduced : motion.standard;
 }
 
+export function isMotionDisabled(reduceMotion: boolean, screenReader: boolean) {
+  return reduceMotion || screenReader;
+}
+
 export function useMotionDisabled() {
-  const [disabled, setDisabled] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const [screenReader, setScreenReader] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -26,11 +31,14 @@ export function useMotionDisabled() {
         AccessibilityInfo.isReduceMotionEnabled(),
         AccessibilityInfo.isScreenReaderEnabled(),
       ]);
-      if (mounted) setDisabled(reduceMotion || screenReader);
+      if (mounted) {
+        setReduceMotion(reduceMotion);
+        setScreenReader(screenReader);
+      }
     };
     void update();
-    const reduceSubscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setDisabled);
-    const readerSubscription = AccessibilityInfo.addEventListener('screenReaderChanged', setDisabled);
+    const reduceSubscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduceMotion);
+    const readerSubscription = AccessibilityInfo.addEventListener('screenReaderChanged', setScreenReader);
     return () => {
       mounted = false;
       reduceSubscription.remove();
@@ -38,7 +46,7 @@ export function useMotionDisabled() {
     };
   }, []);
 
-  return disabled;
+  return isMotionDisabled(reduceMotion, screenReader);
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);

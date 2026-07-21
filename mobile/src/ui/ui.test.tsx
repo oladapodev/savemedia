@@ -137,7 +137,7 @@ test('choice bar exposes equal accessible options and selection changes', async 
   const options = screen.getAllByRole('button');
   expect(options).toHaveLength(4);
   options.forEach((option) => expect(option).toHaveStyle({ minWidth: 0 }));
-  expect(screen.getByRole('button', { name: 'Video' }).props.accessibilityState).toEqual({ selected: true });
+  expect(screen.getByRole('button', { name: 'Video' }).props.accessibilityState).toEqual(expect.objectContaining({ selected: true }));
   fireEvent.press(screen.getByRole('button', { name: 'Images' }));
   expect(onChange).toHaveBeenCalledWith('images');
 });

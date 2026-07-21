@@ -1,5 +1,5 @@
 export { AppThemeProvider, useTheme, type ThemeMode } from './theme';
-export { tabItems } from './tabs';
+export { getTabMotion, tabItems } from './tabs';
 export { Text } from './text';
 export { Divider, Inline, PageHeader, ResponsiveGrid, getResponsiveColumnCount, Screen, Stack, Surface } from './layout';
 export { Button, IconButton, type ButtonVariant } from './button';
@@ -9,5 +9,5 @@ export { EmptyState, type EmptyStateProps } from './empty-state';
 export { Icon, iconStrokeWidth, type IconName } from './icon';
 export { ProgressBar } from './progress';
 export { MediaThumbnail } from './media-thumbnail';
-export { AnimatedFocus, MotionPressable, Reveal, resolveMotion, useMotionDisabled } from './motion';
+export { AnimatedFocus, MotionPressable, Reveal, isMotionDisabled, resolveMotion, useMotionDisabled } from './motion';
 export { elevation, motion, radius, space, type } from './tokens';

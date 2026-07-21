@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
-import { Pressable } from 'react-native';
-import { Icon, Inline, Stack, Text, type IconName, useTheme } from '../../ui';
+import { Icon, Inline, MotionPressable, Stack, Text, type IconName, useTheme } from '../../ui';
 
 export function SettingRow({ accessibilityLabel, control, description, icon = 'settings', onPress, title, value }: {
   accessibilityLabel?: string; control?: ReactNode; description?: string; icon?: IconName; onPress?: () => void; title: string; value?: string;
@@ -17,6 +16,6 @@ export function SettingRow({ accessibilityLabel, control, description, icon = 's
       {onPress ? <Text color="textMuted">›</Text> : null}
     </Inline>
   </Stack>;
-  return onPress ? <Pressable accessibilityLabel={accessibilityLabel ?? title} accessibilityRole="link" onPress={onPress}
-    style={({ pressed }) => ({ opacity: pressed ? 0.65 : 1 })}>{content}</Pressable> : content;
+  return onPress ? <MotionPressable accessibilityLabel={accessibilityLabel ?? title} accessibilityRole="link" onPress={onPress}
+    style={({ pressed }) => ({ opacity: pressed ? 0.65 : 1 })}>{content}</MotionPressable> : content;
 }
