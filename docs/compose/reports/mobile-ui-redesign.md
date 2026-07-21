@@ -46,8 +46,8 @@ Custom background download and share-extension behavior requires an iMediaSave d
 ## Verification
 
 - Mobile TypeScript passed with `tsc --noEmit`.
-- The complete mobile Jest run passed: 41 suites and 344 tests.
-- Web TypeScript and ESLint passed; the web suite passed 22 tests, including thumbnail URL policy coverage.
+- The complete mobile Jest run passed: 41 suites and 349 tests.
+- Web TypeScript and ESLint passed; the web suite passed 25 tests, including signed thumbnail, raster signature, and bounded-stream coverage.
 - Expo public config resolved SDK 57, automatic theme mode, the official icon paths, and the Android/iOS identifiers successfully.
 - All five supplied promotional assets were inspected at `1200x600`; the earlier black/white clipping came from collapsed layout, not from the source files.
 - `git diff --check` passed. Final physical-device visual acceptance remains the release check because this mobile package does not install a React Native web renderer.
