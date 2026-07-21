@@ -15,10 +15,17 @@ function TestApp({ children }: { children: React.ReactNode }) {
   </SafeAreaProvider>;
 }
 
-test('home presents a compact branded header, lightweight benefits, promo, and guide', async () => {
+test('home presents a rounded orange hero with an overlapping white download card', async () => {
   await render(<TestApp><HomeScreen model={readyHomeModel} /></TestApp>);
   expect(screen.getByRole('header', { name: 'iMediaSave' })).toBeTruthy();
-  expect(StyleSheet.flatten(screen.getByTestId('home-header').props.style)).toEqual(expect.objectContaining({ borderBottomLeftRadius: 24, borderBottomRightRadius: 24 }));
+  expect(StyleSheet.flatten(screen.getByTestId('home-hero').props.style)).toEqual(expect.objectContaining({
+    backgroundColor: '#FA6E09', borderBottomLeftRadius: 28, borderBottomRightRadius: 28,
+    borderTopLeftRadius: 28, borderTopRightRadius: 28,
+  }));
+  expect(StyleSheet.flatten(screen.getByTestId('home-logo-tile').props.style)).toEqual(expect.objectContaining({
+    backgroundColor: '#FFFFFF', borderRadius: 18,
+  }));
+  expect(StyleSheet.flatten(screen.getByTestId('home-download-card').props.style)).toEqual(expect.objectContaining({ marginTop: -44 }));
   expect(screen.getByLabelText('iMediaSave logo')).toBeTruthy();
   expect(screen.getByPlaceholderText('Paste link here…')).toBeTruthy();
   expect(screen.getByRole('button', { name: 'Paste' })).toBeTruthy();

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Image, TextInput, View, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button, Icon, Inline, ProgressBar, Screen, Stack, Surface, Text, radius, space, useTheme, type ButtonVariant } from '../../ui';
+import { Button, Icon, Inline, ProgressBar, Reveal, Screen, Stack, Surface, Text, radius, space, useTheme, type ButtonVariant } from '../../ui';
 import type { DownloadSelection } from '../../downloads/types';
 import { DownloadCard } from './download-card';
 import { PromoCarousel } from './promo-carousel';
@@ -128,25 +128,31 @@ export function HomeScreen({ model, onChooseMedia, onPrimaryAction, onSecondaryA
   };
 
   return <Screen contentContainerStyle={{ paddingHorizontal: 0, paddingTop: 0 }} edges={['left', 'right']} scroll>
-    <View testID="home-header" style={{ backgroundColor: colors.surface, borderBottomColor: colors.border,
-      borderBottomLeftRadius: 24, borderBottomRightRadius: 24, borderBottomWidth: 1, marginHorizontal: 0,
-      overflow: 'hidden', paddingBottom: space.lg, paddingHorizontal: space.md, paddingTop: getHomeHeaderTopPadding(top) }}>
-      <Stack gap="lg">
-        <Inline gap="sm" style={{ alignItems: 'center' }}>
-        <Image accessibilityLabel="iMediaSave logo" accessibilityRole="image" source={require('../../../assets/brand-logo.png')}
-          style={{ borderRadius: radius.control, height: 44, width: 44 }} />
-          <Stack gap={0} grow>
-            <Text accessibilityRole="header" variant="title">iMediaSave</Text>
-            <Text color="textMuted" numberOfLines={1} variant="caption">Save public media in seconds</Text>
+    <Reveal>
+      <View testID="home-header" style={{ paddingHorizontal: space.md }}>
+        <View testID="home-hero" style={{ alignItems: 'center', backgroundColor: colors.accent,
+          borderBottomLeftRadius: 28, borderBottomRightRadius: 28, borderTopLeftRadius: 28, borderTopRightRadius: 28,
+          overflow: 'hidden', paddingBottom: 72, paddingHorizontal: space.lg, paddingTop: getHomeHeaderTopPadding(top) }}>
+          <Stack gap="md" style={{ alignItems: 'center', maxWidth: 360, width: '100%' }}>
+            <View testID="home-logo-tile" style={{ alignItems: 'center', backgroundColor: colors.surface, borderRadius: 18,
+              height: 76, justifyContent: 'center', width: 76 }}>
+              <Image accessibilityLabel="iMediaSave logo" accessibilityRole="image" source={require('../../../assets/brand-logo.png')}
+                style={{ borderRadius: radius.control, height: 58, width: 58 }} />
+            </View>
+            <Stack gap="xs" style={{ alignItems: 'center' }}>
+              <Text accessibilityRole="header" color="heroText" style={{ textAlign: 'center' }} variant="display">iMediaSave</Text>
+              <Text color="heroText" style={{ opacity: 0.88, textAlign: 'center' }} variant="body">Save public media in seconds</Text>
+            </Stack>
           </Stack>
-        </Inline>
-        <Surface padding="md" style={{ width: '100%' }} tone="surfaceMuted">
+        </View>
+        <Surface padding="md" testID="home-download-card" style={{ borderRadius: radius.sheet, marginHorizontal: space.sm,
+          marginTop: -44, width: 'auto' }}>
           <Stack gap="sm">
             <View style={{ flexDirection: formDirection, gap: space.sm, width: '100%' }}>
               <TextInput autoCapitalize="none" autoCorrect={false} keyboardType="url" onChangeText={(value) => { setUrl(value); setFormError(undefined); }} placeholder="Paste link here…"
                 placeholderTextColor={colors.textMuted} value={url}
-                style={{ backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.control, borderWidth: 1, color: colors.text,
-                  flex: formDirection === 'row' ? 1 : undefined, minHeight: 46, minWidth: 0, paddingHorizontal: 13,
+                style={{ backgroundColor: colors.surfaceMuted, borderColor: colors.border, borderRadius: radius.control, borderWidth: 1, color: colors.text,
+                  flex: formDirection === 'row' ? 1 : undefined, minHeight: 48, minWidth: 0, paddingHorizontal: 13,
                   width: formDirection === 'column' ? '100%' : undefined }} />
               <Button label="Paste" loading={pasting} onPress={paste} variant="secondary"
                 style={{ alignSelf: 'stretch', minWidth: formDirection === 'row' ? 72 : 0 }} />
@@ -155,29 +161,29 @@ export function HomeScreen({ model, onChooseMedia, onPrimaryAction, onSecondaryA
             {formError ? <Text accessibilityRole="alert" color="danger" variant="caption">{formError}</Text> : null}
           </Stack>
         </Surface>
-      </Stack>
-    </View>
+      </View>
+    </Reveal>
 
     <Stack gap="xl" style={{ padding: space.md }}>
-      {model.phase !== 'ready' ? <Stack gap="md">
+      {model.phase !== 'ready' ? <Reveal delay={20}><Stack gap="md">
         <DownloadCard model={model} onChooseMedia={onChooseMedia} onPrimaryAction={onPrimaryAction} onSecondaryAction={onSecondaryAction} />
         {typeof model.progress === 'number' ? <ProgressCard progress={model.progress} /> : null}
         <StatusNotice model={model} />
-      </Stack> : null}
-      <Inline gap="sm" justify="between">
+      </Stack></Reveal> : null}
+      <Reveal delay={20}><Inline gap="sm" justify="between">
         <Benefit icon="bolt" label="Fast Downloads" tone="warning" />
         <Benefit icon="check" label="High Quality" tone="success" />
         <Benefit icon="lock" label="100% Secure" tone="accent" />
-      </Inline>
+      </Inline></Reveal>
 
-      <PromoCarousel />
+      <Reveal delay={40}><PromoCarousel /></Reveal>
 
-      <Stack gap="lg"><Stack gap="xs"><Text variant="title">How it works</Text><Text color="textMuted" variant="caption">Simple steps to download supported public media.</Text></Stack>
+      <Reveal delay={60}><Stack gap="lg"><Stack gap="xs"><Text variant="title">How it works</Text><Text color="textMuted" variant="caption">Simple steps to download supported public media.</Text></Stack>
         <Step detail="Copy a public link from a supported platform." number={1} title="Copy link" />
         <Step detail="Paste the link and review the real media preview." number={2} title="Paste & preview" />
         <Step detail="Choose quality and save it to your device." number={3} title="Download" />
-      </Stack>
-      <Text color="textMuted" variant="caption">Save only content you own or have permission to download.</Text>
+      </Stack></Reveal>
+      <Reveal delay={80}><Text color="textMuted" variant="caption">Save only content you own or have permission to download.</Text></Reveal>
     </Stack>
   </Screen>;
 }
