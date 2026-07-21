@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen, userEvent } from '@testing-library/reac
 import { StyleSheet } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppThemeProvider } from '../../ui';
-import { downloadingHomeModel, getHomeFormDirection, getHomeHeroTopPadding, HomeScreen, readyHomeModel } from './home';
+import { downloadingHomeModel, getHomeFormDirection, getHomeHeaderTopPadding, HomeScreen, isPreviewableUrl, readyHomeModel } from './home';
 
 const mockClipboard = jest.fn().mockResolvedValue('https://instagram.com/reel/one');
 jest.mock('expo-clipboard', () => ({ getStringAsync: () => mockClipboard() }));
@@ -15,10 +15,10 @@ function TestApp({ children }: { children: React.ReactNode }) {
   </SafeAreaProvider>;
 }
 
-test('home presents the approved hero, benefits, promo, and guide', async () => {
+test('home presents a compact branded header, lightweight benefits, promo, and guide', async () => {
   await render(<TestApp><HomeScreen model={readyHomeModel} /></TestApp>);
   expect(screen.getByRole('header', { name: 'iMediaSave' })).toBeTruthy();
-  expect(StyleSheet.flatten(screen.getByTestId('home-hero').props.style)).toEqual(expect.objectContaining({ marginHorizontal: 0 }));
+  expect(StyleSheet.flatten(screen.getByTestId('home-header').props.style)).toEqual(expect.objectContaining({ borderBottomLeftRadius: 24, borderBottomRightRadius: 24 }));
   expect(screen.getByLabelText('iMediaSave logo')).toBeTruthy();
   expect(screen.getByPlaceholderText('Paste link here…')).toBeTruthy();
   expect(screen.getByRole('button', { name: 'Paste' })).toBeTruthy();
@@ -36,7 +36,10 @@ test('home presents the approved hero, benefits, promo, and guide', async () => 
 test('home form stacks only on narrow phones', () => {
   expect(getHomeFormDirection(320)).toBe('column');
   expect(getHomeFormDirection(390)).toBe('row');
-  expect(getHomeHeroTopPadding(44)).toBe(60);
+  expect(getHomeHeaderTopPadding(44)).toBe(52);
+  expect(isPreviewableUrl('https://instagram.com/reel/one')).toBe(true);
+  expect(isPreviewableUrl('javascript:alert(1)')).toBe(false);
+  expect(isPreviewableUrl('not a link')).toBe(false);
 });
 
 test('home keeps model-driven download progress and actions', async () => {
@@ -64,6 +67,27 @@ test('home submits a typed link for preview', async () => {
   await act(async () => { fireEvent.changeText(screen.getByPlaceholderText('Paste link here…'), ' https://youtube.com/watch?v=one '); });
   fireEvent.press(screen.getByRole('button', { name: 'Preview download' }));
   expect(onSubmitUrl).toHaveBeenCalledWith('https://youtube.com/watch?v=one');
+});
+
+test('home rejects an invalid link before submitting', async () => {
+  const onSubmitUrl = jest.fn();
+  await render(<TestApp><HomeScreen model={readyHomeModel} onSubmitUrl={onSubmitUrl} /></TestApp>);
+  await act(async () => { fireEvent.changeText(screen.getByPlaceholderText('Paste link here…'), 'not a link'); });
+  await act(async () => { fireEvent.press(screen.getByRole('button', { name: 'Preview download' })); });
+  expect(onSubmitUrl).not.toHaveBeenCalled();
+  expect(screen.getByRole('alert').props.children).toContain('Enter a complete public link');
+});
+
+test('home shows inspection progress and prevents duplicate submissions', async () => {
+  let resolveSubmit!: () => void;
+  const onSubmitUrl = jest.fn(() => new Promise<void>((resolve) => { resolveSubmit = resolve; }));
+  await render(<TestApp><HomeScreen model={readyHomeModel} onSubmitUrl={onSubmitUrl} /></TestApp>);
+  await act(async () => { fireEvent.changeText(screen.getByPlaceholderText('Paste link here…'), 'https://example.com/video'); });
+  await act(async () => { fireEvent.press(screen.getByRole('button', { name: 'Preview download' })); });
+  expect(screen.getByRole('button', { name: 'Preview download' }).props.accessibilityState.disabled).toBe(true);
+  fireEvent.press(screen.getByRole('button', { name: 'Preview download' }));
+  expect(onSubmitUrl).toHaveBeenCalledTimes(1);
+  await act(async () => { resolveSubmit(); });
 });
 
 test('home presents clipboard failures without rejecting the press action', async () => {

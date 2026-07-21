@@ -17,6 +17,11 @@ export function shouldAnimateCarouselNavigation(motionBlocked: boolean) {
   return !motionBlocked;
 }
 
+export function getPromoSize(candidateWidth: number) {
+  const width = Math.max(1, Math.floor(candidateWidth));
+  return { height: Math.max(1, Math.round(width / 2)), width };
+}
+
 export function PromoCarousel({ autoAdvanceMs = 4_000, slides = promoSlides }: {
   autoAdvanceMs?: number; slides?: readonly PromoSlide[];
 }) {
@@ -25,6 +30,7 @@ export function PromoCarousel({ autoAdvanceMs = 4_000, slides = promoSlides }: {
   const fallbackWidth = useMemo(() => Math.max(1, Math.min(windowWidth, 720) - (space.md * 2)), [windowWidth]);
   const [measuredWidth, setMeasuredWidth] = useState<number>();
   const width = measuredWidth ?? fallbackWidth;
+  const frame = getPromoSize(width);
   const listRef = useRef<FlatList<PromoSlide>>(null);
   const previousWidthRef = useRef(width);
   const [active, setActive] = useState(0);
@@ -83,9 +89,9 @@ export function PromoCarousel({ autoAdvanceMs = 4_000, slides = promoSlides }: {
     <FlatList data={[...slides]} decelerationRate="fast" getItemLayout={(_, index) => ({ index, length: width, offset: width * index })}
       accessibilityLabel="Promotional highlights" horizontal keyExtractor={(item) => item.id} onMomentumScrollEnd={settle} onScrollBeginDrag={() => setDragging(true)}
       onScrollEndDrag={() => setDragging(false)} pagingEnabled ref={listRef} showsHorizontalScrollIndicator={false}
-      renderItem={({ item }) => <View style={{ width }}><Image accessibilityLabel={item.label} accessibilityRole="image"
-        resizeMode="cover" source={item.image} style={{ aspectRatio: 2, borderRadius: radius.card, width: '100%' }} /></View>}
-      style={{ borderRadius: radius.card, width }} />
+      renderItem={({ item }) => <View style={frame}><Image accessibilityLabel={item.label} accessibilityRole="image"
+        resizeMode="cover" source={item.image} style={{ borderRadius: radius.card, height: frame.height, width: frame.width }} /></View>}
+      style={{ borderRadius: radius.card, height: frame.height, width: frame.width }} />
     <Inline gap={0} justify="center">
       {slides.map((slide, index) => <Pressable accessibilityLabel={`Show promotion ${index + 1}`} accessibilityRole="button"
         accessibilityState={{ selected: index === active }} key={slide.id} onPress={() => show(index)}

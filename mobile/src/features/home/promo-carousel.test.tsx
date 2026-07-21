@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 
 import { AppThemeProvider } from '../../ui';
-import { PromoCarousel, shouldAnimateCarouselNavigation } from './promo-carousel';
+import { getPromoSize, PromoCarousel, shouldAnimateCarouselNavigation } from './promo-carousel';
 
 function TestApp() {
   return <AppThemeProvider mode="light"><PromoCarousel autoAdvanceMs={4_000} /></AppThemeProvider>;
@@ -12,6 +12,11 @@ afterEach(() => { jest.useRealTimers(); });
 test('carousel navigation obeys reduced-motion and screen-reader modes', () => {
   expect(shouldAnimateCarouselNavigation(false)).toBe(true);
   expect(shouldAnimateCarouselNavigation(true)).toBe(false);
+});
+
+test('carousel reserves a stable two-to-one image frame', () => {
+  expect(getPromoSize(358)).toEqual({ height: 179, width: 358 });
+  expect(getPromoSize(0)).toEqual({ height: 1, width: 1 });
 });
 
 test('carousel exposes the five supplied promotions and pagination controls', async () => {

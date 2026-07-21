@@ -35,12 +35,12 @@ type HomeScreenProps = {
 
 function Benefit({ icon, label, tone }: { icon: 'bolt' | 'check' | 'lock'; label: string; tone: 'accent' | 'success' | 'warning' }) {
   const { colors } = useTheme();
-  return <Surface padding="sm" tone="surfaceMuted" style={{ alignItems: 'center', flex: 1, minHeight: 82, justifyContent: 'center' }}>
-    <Stack gap="sm" style={{ alignItems: 'center' }}>
-      <Icon color={tone} name={icon} size={22} />
+  return <View style={{ alignItems: 'center', flex: 1, justifyContent: 'center', minWidth: 0, paddingVertical: space.sm }}>
+    <Stack gap="xs" style={{ alignItems: 'center' }}>
+      <Icon color={tone} name={icon} size={21} />
       <Text style={{ color: colors.text, textAlign: 'center' }} variant="caption">{label}</Text>
     </Stack>
-  </Surface>;
+  </View>;
 }
 
 function Step({ detail, number, title }: { detail: string; number: number; title: string }) {
@@ -57,8 +57,17 @@ export function getHomeFormDirection(width: number): 'column' | 'row' {
   return width < 360 ? 'column' : 'row';
 }
 
-export function getHomeHeroTopPadding(topInset: number) {
-  return topInset + space.md;
+export function getHomeHeaderTopPadding(topInset: number) {
+  return topInset + space.sm;
+}
+
+export function isPreviewableUrl(value: string) {
+  try {
+    const url = new URL(value.trim());
+    return (url.protocol === 'https:' || url.protocol === 'http:') && Boolean(url.hostname);
+  } catch {
+    return false;
+  }
 }
 
 export function ProgressCard({ progress }: { progress: number }) {
@@ -86,40 +95,64 @@ export function HomeScreen({ model, onChooseMedia, onPrimaryAction, onSecondaryA
   const formDirection = getHomeFormDirection(width);
   const [url, setUrl] = useState('');
   const [pasting, setPasting] = useState(false);
-  const [pasteError, setPasteError] = useState<string>();
+  const [formError, setFormError] = useState<string>();
+  const [inspecting, setInspecting] = useState(false);
 
   const paste = async () => {
     setPasting(true);
-    setPasteError(undefined);
+    setFormError(undefined);
     try {
       const value = await (require('expo-clipboard') as typeof import('expo-clipboard')).getStringAsync();
       setUrl(value.trim());
     } catch {
-      setPasteError('Could not read your clipboard. Paste the link manually and try again.');
+      setFormError('Could not read your clipboard. Paste the link manually and try again.');
     } finally { setPasting(false); }
   };
 
-  return <Screen contentContainerStyle={{ paddingHorizontal: 0, paddingTop: 0 }} edges={['left', 'right', 'bottom']} scroll>
-    <View testID="home-hero" style={{ backgroundColor: colors.accent, borderBottomLeftRadius: 28, borderBottomRightRadius: 28,
-      marginHorizontal: 0, overflow: 'hidden', paddingBottom: space.lg, paddingHorizontal: space.md, paddingTop: getHomeHeroTopPadding(top) }}>
-      <Stack gap="md" style={{ alignItems: 'center' }}>
+  const submit = async () => {
+    const value = url.trim();
+    if (inspecting) return;
+    if (!isPreviewableUrl(value)) {
+      setFormError('Enter a complete public link beginning with http:// or https://.');
+      return;
+    }
+    setFormError(undefined);
+    setInspecting(true);
+    try {
+      await onSubmitUrl?.(value);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : 'We could not preview that link. Try again.');
+    } finally {
+      setInspecting(false);
+    }
+  };
+
+  return <Screen contentContainerStyle={{ paddingHorizontal: 0, paddingTop: 0 }} edges={['left', 'right']} scroll>
+    <View testID="home-header" style={{ backgroundColor: colors.surface, borderBottomColor: colors.border,
+      borderBottomLeftRadius: 24, borderBottomRightRadius: 24, borderBottomWidth: 1, marginHorizontal: 0,
+      overflow: 'hidden', paddingBottom: space.lg, paddingHorizontal: space.md, paddingTop: getHomeHeaderTopPadding(top) }}>
+      <Stack gap="lg">
+        <Inline gap="sm" style={{ alignItems: 'center' }}>
         <Image accessibilityLabel="iMediaSave logo" accessibilityRole="image" source={require('../../../assets/brand-logo.png')}
-          style={{ borderRadius: radius.card, height: 72, width: 72 }} />
-        <Text accessibilityRole="header" color="heroText" variant="display">iMediaSave</Text>
-        <Text color="heroText" style={{ maxWidth: 270, textAlign: 'center' }}>Download Instagram, TikTok and more media in seconds.</Text>
-        <Surface padding="sm" style={{ width: '100%' }}>
+          style={{ borderRadius: radius.control, height: 44, width: 44 }} />
+          <Stack gap={0} grow>
+            <Text accessibilityRole="header" variant="title">iMediaSave</Text>
+            <Text color="textMuted" numberOfLines={1} variant="caption">Save public media in seconds</Text>
+          </Stack>
+        </Inline>
+        <Surface padding="md" style={{ width: '100%' }} tone="surfaceMuted">
           <Stack gap="sm">
             <View style={{ flexDirection: formDirection, gap: space.sm, width: '100%' }}>
-              <TextInput autoCapitalize="none" autoCorrect={false} onChangeText={setUrl} placeholder="Paste link here…"
+              <TextInput autoCapitalize="none" autoCorrect={false} keyboardType="url" onChangeText={(value) => { setUrl(value); setFormError(undefined); }} placeholder="Paste link here…"
                 placeholderTextColor={colors.textMuted} value={url}
-                style={{ backgroundColor: colors.surfaceMuted, borderRadius: radius.control, color: colors.text,
+                style={{ backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.control, borderWidth: 1, color: colors.text,
                   flex: formDirection === 'row' ? 1 : undefined, minHeight: 46, minWidth: 0, paddingHorizontal: 13,
                   width: formDirection === 'column' ? '100%' : undefined }} />
-              <Button label="Paste" loading={pasting} onPress={paste}
+              <Button label="Paste" loading={pasting} onPress={paste} variant="secondary"
                 style={{ alignSelf: 'stretch', minWidth: formDirection === 'row' ? 72 : 0 }} />
             </View>
-            <Button disabled={!url.trim()} icon="download" label="Preview download" onPress={() => { void onSubmitUrl?.(url.trim()); }} />
-            {pasteError ? <Text accessibilityRole="alert" color="danger" variant="caption">{pasteError}</Text> : null}
+            <Button disabled={!url.trim() || inspecting} icon="download" label="Preview download" loading={inspecting} onPress={() => { void submit(); }} />
+            {formError ? <Text accessibilityRole="alert" color="danger" variant="caption">{formError}</Text> : null}
           </Stack>
         </Surface>
       </Stack>
@@ -131,7 +164,7 @@ export function HomeScreen({ model, onChooseMedia, onPrimaryAction, onSecondaryA
         {typeof model.progress === 'number' ? <ProgressCard progress={model.progress} /> : null}
         <StatusNotice model={model} />
       </Stack> : null}
-      <Inline gap="md" justify="between">
+      <Inline gap="sm" justify="between">
         <Benefit icon="bolt" label="Fast Downloads" tone="warning" />
         <Benefit icon="check" label="High Quality" tone="success" />
         <Benefit icon="lock" label="100% Secure" tone="accent" />
