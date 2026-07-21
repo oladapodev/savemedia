@@ -178,12 +178,12 @@ export function HomeScreen({ model, onChooseMedia, onPrimaryAction, onSecondaryA
 
       <Reveal delay={40}><PromoCarousel /></Reveal>
 
-      <Reveal delay={60}><Stack gap="lg"><Stack gap="xs"><Text variant="title">How it works</Text><Text color="textMuted" variant="caption">Simple steps to download supported public media.</Text></Stack>
+      <Reveal delay={40}><Stack gap="lg"><Stack gap="xs"><Text variant="title">How it works</Text><Text color="textMuted" variant="caption">Simple steps to download supported public media.</Text></Stack>
         <Step detail="Copy a public link from a supported platform." number={1} title="Copy link" />
         <Step detail="Paste the link and review the real media preview." number={2} title="Paste & preview" />
         <Step detail="Choose quality and save it to your device." number={3} title="Download" />
       </Stack></Reveal>
-      <Reveal delay={80}><Text color="textMuted" variant="caption">Save only content you own or have permission to download.</Text></Reveal>
+      <Reveal delay={40}><Text color="textMuted" variant="caption">Save only content you own or have permission to download.</Text></Reveal>
     </Stack>
   </Screen>;
 }

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AccessibilityInfo, FlatList, Image, View, useWindowDimensions, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
+import { FlatList, Image, View, useWindowDimensions, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 
-import { AnimatedFocus, Icon, Inline, MotionPressable, Stack, radius, space, useTheme } from '../../ui';
+import { AnimatedFocus, Icon, Inline, MotionPressable, Stack, radius, space, useMotionDisabled, useTheme } from '../../ui';
 
 export type PromoSlide = { id: string; image: number; label: string };
 
@@ -35,10 +35,8 @@ export function PromoCarousel({ autoAdvanceMs = 4_000, slides = promoSlides }: {
   const previousWidthRef = useRef(width);
   const [active, setActive] = useState(0);
   const [dragging, setDragging] = useState(false);
-  const [reduceMotion, setReduceMotion] = useState(false);
-  const [screenReader, setScreenReader] = useState(false);
   const [paused, setPaused] = useState(false);
-  const motionBlocked = reduceMotion || screenReader;
+  const motionBlocked = useMotionDisabled();
 
   const show = useCallback((index: number) => {
     if (slides.length === 0) return;
@@ -46,27 +44,6 @@ export function PromoCarousel({ autoAdvanceMs = 4_000, slides = promoSlides }: {
     setActive(next);
     listRef.current?.scrollToIndex({ animated: shouldAnimateCarouselNavigation(motionBlocked), index: next });
   }, [motionBlocked, slides.length]);
-
-  useEffect(() => {
-    let mounted = true;
-    const update = async () => {
-      const [shouldReduceMotion, isScreenReaderEnabled] = await Promise.all([
-        AccessibilityInfo.isReduceMotionEnabled(), AccessibilityInfo.isScreenReaderEnabled(),
-      ]);
-      if (mounted) {
-        setReduceMotion(shouldReduceMotion);
-        setScreenReader(isScreenReaderEnabled);
-      }
-    };
-    void update();
-    const reduceMotionSubscription = AccessibilityInfo.addEventListener('reduceMotionChanged', setReduceMotion);
-    const screenReaderSubscription = AccessibilityInfo.addEventListener('screenReaderChanged', setScreenReader);
-    return () => {
-      mounted = false;
-      reduceMotionSubscription.remove();
-      screenReaderSubscription.remove();
-    };
-  }, []);
 
   useEffect(() => {
     if (dragging || motionBlocked || paused || slides.length < 2) return undefined;

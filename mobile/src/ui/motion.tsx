@@ -16,13 +16,17 @@ export function resolveMotion(disabled: boolean) {
   return disabled ? motion.reduced : motion.standard;
 }
 
-export function isMotionDisabled(reduceMotion: boolean, screenReader: boolean) {
-  return reduceMotion || screenReader;
+export function isMotionDisabled(reduceMotion: boolean | null, screenReader: boolean | null) {
+  return reduceMotion !== false || screenReader !== false;
+}
+
+export function capRevealDelay(delay: number) {
+  return Math.max(0, Math.min(delay, 40));
 }
 
 export function useMotionDisabled() {
-  const [reduceMotion, setReduceMotion] = useState(false);
-  const [screenReader, setScreenReader] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState<boolean | null>(null);
+  const [screenReader, setScreenReader] = useState<boolean | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -87,7 +91,7 @@ export function Reveal({ children, delay = 0, distance, style }: PropsWithChildr
       return undefined;
     }
     const animation = Animated.timing(progress, {
-      delay: Math.min(delay, 120),
+      delay: capRevealDelay(delay),
       duration: policy.stateDuration,
       easing: Easing.out(Easing.cubic),
       toValue: 1,
