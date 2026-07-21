@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as HelpRouteImport } from './routes/help'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as DownloaderRouteImport } from './routes/downloader'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
 import { Route as BlogRouteImport } from './routes/blog'
@@ -37,6 +39,16 @@ const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HelpRoute = HelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DownloaderRoute = DownloaderRouteImport.update({
@@ -101,6 +113,8 @@ export interface FileRoutesByFullPath {
   '/disclaimer': typeof DisclaimerRoute
   '/downloader': typeof DownloaderRoute
   '/privacy': typeof PrivacyRoute
+  '/help': typeof HelpRoute
+  '/contact': typeof ContactRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/download': typeof ApiDownloadRoute
@@ -116,6 +130,8 @@ export interface FileRoutesByTo {
   '/disclaimer': typeof DisclaimerRoute
   '/downloader': typeof DownloaderRoute
   '/privacy': typeof PrivacyRoute
+  '/help': typeof HelpRoute
+  '/contact': typeof ContactRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/download': typeof ApiDownloadRoute
@@ -133,6 +149,8 @@ export interface FileRoutesById {
   '/disclaimer': typeof DisclaimerRoute
   '/downloader': typeof DownloaderRoute
   '/privacy': typeof PrivacyRoute
+  '/help': typeof HelpRoute
+  '/contact': typeof ContactRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/download': typeof ApiDownloadRoute
@@ -151,6 +169,8 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/downloader'
     | '/privacy'
+    | '/help'
+    | '/contact'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/api/download'
@@ -166,6 +186,8 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/downloader'
     | '/privacy'
+    | '/help'
+    | '/contact'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/api/download'
@@ -182,6 +204,8 @@ export interface FileRouteTypes {
     | '/disclaimer'
     | '/downloader'
     | '/privacy'
+    | '/help'
+    | '/contact'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/api/download'
@@ -199,6 +223,8 @@ export interface RootRouteChildren {
   DisclaimerRoute: typeof DisclaimerRoute
   DownloaderRoute: typeof DownloaderRoute
   PrivacyRoute: typeof PrivacyRoute
+  HelpRoute: typeof HelpRoute
+  ContactRoute: typeof ContactRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiDownloadRoute: typeof ApiDownloadRoute
@@ -229,6 +255,20 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/help': {
+      id: '/help'
+      path: '/help'
+      fullPath: '/help'
+      preLoaderRoute: typeof HelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/downloader': {
@@ -329,6 +369,8 @@ const rootRouteChildren: RootRouteChildren = {
   DisclaimerRoute: DisclaimerRoute,
   DownloaderRoute: DownloaderRoute,
   PrivacyRoute: PrivacyRoute,
+  HelpRoute: HelpRoute,
+  ContactRoute: ContactRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiDownloadRoute: ApiDownloadRoute,
