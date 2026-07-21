@@ -1,6 +1,7 @@
-import { ActivityIndicator, Pressable, type PressableProps } from 'react-native';
+import { ActivityIndicator, type PressableProps } from 'react-native';
 import { Icon, type IconName } from './icon';
 import { Inline } from './layout';
+import { MotionPressable } from './motion';
 import { radius, space, type ThemeColor } from './tokens';
 import { Text } from './text';
 import { useTheme } from './theme';
@@ -19,7 +20,7 @@ export function Button({ accessibilityLabel, disabled = false, icon, label, load
   const selected = palette[variant];
   const inactive = disabled || loading;
   return (
-    <Pressable {...props} accessibilityLabel={accessibilityLabel ?? label} accessibilityRole="button"
+    <MotionPressable {...props} accessibilityLabel={accessibilityLabel ?? label} accessibilityRole="button"
       accessibilityState={{ busy: loading, disabled: inactive }} disabled={inactive}
       style={(state) => [{ alignItems: 'center', backgroundColor: colors[selected.background], borderColor: colors[selected.border],
         borderRadius: radius.control, borderWidth: 1, flexShrink: 0, justifyContent: 'center', maxWidth: '100%', minHeight: 48, minWidth: 0,
@@ -29,15 +30,15 @@ export function Button({ accessibilityLabel, disabled = false, icon, label, load
         {loading ? <ActivityIndicator color={colors[selected.foreground]} /> : icon ? <Icon color={selected.foreground} name={icon} size={18} /> : null}
         <Text color={selected.foreground} style={{ flexShrink: 1, minWidth: 0, textAlign: 'center' }} variant="label">{label}</Text>
       </Inline>
-    </Pressable>
+    </MotionPressable>
   );
 }
 
 export type IconButtonProps = Omit<PressableProps, 'children'> & { icon: IconName; label: string; tone?: ThemeColor };
 export function IconButton({ disabled = false, icon, label, style, tone = 'text', ...props }: IconButtonProps) {
   const { colors } = useTheme();
-  return <Pressable {...props} accessibilityLabel={label} accessibilityRole="button" disabled={disabled} hitSlop={space.sm}
+  return <MotionPressable {...props} accessibilityLabel={label} accessibilityRole="button" disabled={disabled} hitSlop={space.sm}
     style={(state) => [{ alignItems: 'center', backgroundColor: colors.surfaceMuted, borderRadius: radius.round, height: 44,
       flexShrink: 0, justifyContent: 'center', maxWidth: '100%', opacity: disabled ? 0.45 : state.pressed ? 0.65 : 1, width: 44 },
-    typeof style === 'function' ? style(state) : style]}><Icon color={tone} name={icon} size={20} /></Pressable>;
+    typeof style === 'function' ? style(state) : style]}><Icon color={tone} name={icon} size={20} /></MotionPressable>;
 }

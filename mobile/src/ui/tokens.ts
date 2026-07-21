@@ -2,7 +2,7 @@ export const space = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32, xxl: 48 } as const;
 export const radius = { control: 12, card: 16, sheet: 20, round: 999 } as const;
 export const elevation = { flat: 0, raised: 0, floating: 0 } as const;
 
-const standardMotion = { feedbackDuration: 100, stateDuration: 160, decorativeDistance: 0 } as const;
+const standardMotion = { feedbackDuration: 120, stateDuration: 220, decorativeDistance: 10 } as const;
 const reducedMotion: Record<keyof typeof standardMotion, number> = { feedbackDuration: 0, stateDuration: 0, decorativeDistance: 0 };
 export const motion = { standard: standardMotion, reduced: reducedMotion } as const;
 
