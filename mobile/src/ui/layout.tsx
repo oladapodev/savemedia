@@ -5,13 +5,13 @@ import { radius, space, type Elevation, type Space, type ThemeColor } from './to
 import { Text } from './text';
 import { useTheme } from './theme';
 
-type ScreenProps = ViewProps & { contentContainerStyle?: ScrollViewProps['contentContainerStyle']; edges?: readonly Edge[]; scroll?: boolean };
+type ScreenProps = ViewProps & { contentContainerStyle?: ScrollViewProps['contentContainerStyle']; edges?: readonly Edge[]; scroll?: boolean; scrollTestID?: string };
 const readableWidth = 720;
-export function Screen({ children, contentContainerStyle, edges = ['top', 'right', 'bottom', 'left'], scroll = false, style, ...props }: ScreenProps) {
+export function Screen({ children, contentContainerStyle, edges = ['top', 'right', 'bottom', 'left'], scroll = false, scrollTestID, style, ...props }: ScreenProps) {
   const { colors } = useTheme();
-  const contentStyle: ViewStyle = { alignSelf: 'center', flexGrow: 1, flexShrink: 1, maxWidth: readableWidth, minWidth: 0, paddingHorizontal: space.md, paddingVertical: space.lg, width: '100%' };
+  const contentStyle: ViewStyle = { alignSelf: 'center', flexGrow: 1, flexShrink: 0, maxWidth: readableWidth, minWidth: 0, paddingHorizontal: space.md, paddingVertical: space.lg, width: '100%' };
   return <SafeAreaView {...props} edges={edges} style={[{ backgroundColor: colors.canvas, flex: 1 }, style]}>
-    {scroll ? <ScrollView contentContainerStyle={[contentStyle, contentContainerStyle]} keyboardShouldPersistTaps="handled">{children}</ScrollView>
+    {scroll ? <ScrollView contentContainerStyle={[contentStyle, contentContainerStyle]} keyboardShouldPersistTaps="handled" testID={scrollTestID}>{children}</ScrollView>
       : <View style={[contentStyle, contentContainerStyle]}>{children}</View>}
   </SafeAreaView>;
 }
@@ -19,7 +19,7 @@ export function Screen({ children, contentContainerStyle, edges = ['top', 'right
 type LayoutProps = ViewProps & { gap?: Space | number; grow?: boolean };
 const resolveGap = (gap: Space | number) => typeof gap === 'number' ? gap : space[gap];
 export function Stack({ gap = 'md', grow = false, style, ...props }: LayoutProps) {
-  return <View {...props} style={[{ flex: grow ? 1 : undefined, flexShrink: 1, gap: resolveGap(gap), maxWidth: '100%', minWidth: 0 }, style]} />;
+  return <View {...props} style={[{ flex: grow ? 1 : undefined, flexShrink: grow ? 1 : 0, gap: resolveGap(gap), maxWidth: '100%', minWidth: 0 }, style]} />;
 }
 
 type InlineProps = LayoutProps & { justify?: 'start' | 'center' | 'end' | 'between'; wrap?: boolean };
@@ -33,7 +33,7 @@ type SurfaceProps = ViewProps & { children?: ReactNode; level?: Elevation; paddi
 export function Surface({ children, padding = 'md', style, tone = 'surface', ...props }: SurfaceProps) {
   const { colors } = useTheme();
   return <View {...props} style={[{ backgroundColor: colors[tone], borderColor: colors.border, borderRadius: radius.card,
-    borderWidth: 1, flexShrink: 1, maxWidth: '100%', minWidth: 0, padding: resolveGap(padding) }, style]}>{children}</View>;
+    borderWidth: 1, flexShrink: 0, maxWidth: '100%', minWidth: 0, padding: resolveGap(padding) }, style]}>{children}</View>;
 }
 
 export function Divider({ style, ...props }: ViewProps) {

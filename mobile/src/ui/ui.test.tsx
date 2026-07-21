@@ -48,7 +48,7 @@ test('responsive grids use one column on narrow or large-text layouts', () => {
   expect(getResponsiveColumnCount({ width: 800, fontScale: 1 })).toBe(2);
 });
 
-test('primary button exposes an accessible role and label', async () => {
+test('primary button keeps its intrinsic height and accessible label', async () => {
   await render(
     <AppThemeProvider mode="light">
       <Button label="Download" onPress={() => undefined} />
@@ -56,14 +56,14 @@ test('primary button exposes an accessible role and label', async () => {
   );
 
   expect(screen.getByRole('button', { name: 'Download' })).toHaveStyle({
-    flexShrink: 1,
+    flexShrink: 0,
     maxWidth: '100%',
     minWidth: 0,
   });
   expect(screen.getByText('Download')).toHaveStyle({ flexShrink: 1 });
 });
 
-test('shared layout primitives stay within narrow parents', async () => {
+test('vertical layout primitives keep intrinsic height within scroll pages', async () => {
   await render(
     <AppThemeProvider mode="light">
       <Stack testID="stack">
@@ -77,13 +77,33 @@ test('shared layout primitives stay within narrow parents', async () => {
     </AppThemeProvider>,
   );
 
-  for (const testID of ['stack', 'inline', 'surface']) {
+  for (const testID of ['stack', 'surface']) {
     expect(screen.getByTestId(testID)).toHaveStyle({
-      flexShrink: 1,
+      flexShrink: 0,
       maxWidth: '100%',
       minWidth: 0,
     });
   }
+  expect(screen.getByTestId('inline')).toHaveStyle({ flexShrink: 1 });
+});
+
+test('growing stacks can yield horizontal space to trailing controls', async () => {
+  await render(<AppThemeProvider mode="light"><Inline><Stack grow testID="growing-stack"><Text>Long title</Text></Stack><Button label="Action" /></Inline></AppThemeProvider>);
+  expect(screen.getByTestId('growing-stack')).toHaveStyle({ flex: 1, flexShrink: 1, minWidth: 0 });
+});
+
+test('scroll screen content grows beyond the viewport instead of shrinking', async () => {
+  const view = await render(
+    <AppThemeProvider mode="light">
+      <Screen scroll scrollTestID="scroll-content" testID="scroll-screen">
+        <Stack><Text>Scrollable content</Text></Stack>
+      </Screen>
+    </AppThemeProvider>,
+  );
+
+  expect(screen.getByTestId('scroll-content').props.contentContainerStyle).toEqual(expect.arrayContaining([
+    expect.objectContaining({ flexGrow: 1, flexShrink: 0 }),
+  ]));
 });
 
 test('pause icons use the shared thin outline stroke', async () => {

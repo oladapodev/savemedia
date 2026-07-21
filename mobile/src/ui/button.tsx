@@ -22,7 +22,7 @@ export function Button({ accessibilityLabel, disabled = false, icon, label, load
     <Pressable {...props} accessibilityLabel={accessibilityLabel ?? label} accessibilityRole="button"
       accessibilityState={{ busy: loading, disabled: inactive }} disabled={inactive}
       style={(state) => [{ alignItems: 'center', backgroundColor: colors[selected.background], borderColor: colors[selected.border],
-        borderRadius: radius.control, borderWidth: 1, flexShrink: 1, justifyContent: 'center', maxWidth: '100%', minHeight: 48, minWidth: 0,
+        borderRadius: radius.control, borderWidth: 1, flexShrink: 0, justifyContent: 'center', maxWidth: '100%', minHeight: 48, minWidth: 0,
         opacity: inactive ? 0.45 : state.pressed ? 0.72 : 1, paddingHorizontal: space.md, paddingVertical: 11 },
       typeof style === 'function' ? style(state) : style]}>
       <Inline gap="sm" justify="center">
