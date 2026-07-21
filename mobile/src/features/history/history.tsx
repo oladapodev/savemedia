@@ -1,179 +1,50 @@
-import {
-  Button,
-  Icon,
-  IconButton,
-  Inline,
-  PageHeader,
-  ResponsiveGrid,
-  Screen,
-  Stack,
-  Surface,
-  Text,
-} from '../../ui';
+import { useMemo, useState } from 'react';
+import { Pressable, TextInput } from 'react-native';
+import { Button, ChoiceBar, EmptyState, Icon, Inline, PageHeader, Screen, Stack, Surface, Text, radius, useTheme } from '../../ui';
 import { HistoryItem } from './item';
 import type { HistoryDeleteChoice } from '../../history/delete';
 
 export type HistoryItemModel = {
-  dateLabel: string;
-  detail: string;
-  id: string;
-  sourceLabel: string;
-  status: 'Saved' | 'Failed';
-  title: string;
-  assetUri?: string;
-  sourceUrl?: string;
+  dateLabel: string; detail: string; id: string; sourceLabel: string; status: 'Saved' | 'Failed' | 'Cancelled';
+  title: string; mediaType?: 'video' | 'image' | 'audio'; assetUri?: string; sourceUrl?: string; thumbnailUrl?: string;
+  quality?: 'Balanced' | 'Original' | 'Audio'; retryable?: boolean; sizeLabel?: string;
 };
+type Filter = 'All' | 'Videos' | 'Images' | 'Audio';
 
-type HistoryScreenProps = {
-  items: HistoryItemModel[];
-  notice?: string;
-  onDeleteSelected?: (ids: string[], choice: HistoryDeleteChoice) => void;
-  onOpenItem?: (item: HistoryItemModel) => void;
-  onRetryItem?: (item: HistoryItemModel) => void;
-  onSelect?: () => void;
-  onShareItem?: (item: HistoryItemModel) => void;
-  onToggleItem?: (item: HistoryItemModel) => void;
-  selectedIds?: string[];
-  selecting?: boolean;
-};
-
-export function EmptyHistory() {
-  return (
-    <Surface padding="lg">
-      <Stack gap="sm">
-        <Icon color="accent" name="history" size={32} />
-        <Text variant="title">Nothing saved yet</Text>
-        <Text color="textMuted">Your saved downloads will appear here.</Text>
-      </Stack>
-    </Surface>
-  );
-}
-
-export function SelectionBar({
-  onDelete,
-  selectedIds,
-}: {
-  onDelete?: (ids: string[], choice: HistoryDeleteChoice) => void;
-  selectedIds: string[];
+export function HistoryScreen({ items, notice, onDeleteSelected, onOpenItem, onRetryItem, onSelect, onShareItem, onToggleItem,
+  selectedIds = [], selecting = false }: {
+  items: HistoryItemModel[]; notice?: string; onDeleteSelected?: (ids: string[], choice: HistoryDeleteChoice) => void;
+  onOpenItem?: (item: HistoryItemModel) => void; onRetryItem?: (item: HistoryItemModel) => void; onSelect?: () => void;
+  onShareItem?: (item: HistoryItemModel) => void; onToggleItem?: (item: HistoryItemModel) => void; selectedIds?: string[]; selecting?: boolean;
 }) {
-  return (
-    <Surface tone="surfaceMuted">
-      <Inline justify="between">
-        <Text variant="label">{selectedIds.length} selected</Text>
-        <Stack gap="sm">
-          <Button
-            accessibilityLabel="Remove selected from history"
-            label="Remove history"
-            onPress={() => onDelete?.(selectedIds, 'history-only')}
-            variant="secondary"
-          />
-          <Button
-            accessibilityLabel="Delete selected from device and history"
-            label="Delete device files"
-            onPress={() => onDelete?.(selectedIds, 'device-and-history')}
-            variant="danger"
-          />
-        </Stack>
-      </Inline>
-    </Surface>
-  );
-}
+  const { colors } = useTheme();
+  const [filter, setFilter] = useState<Filter>('All');
+  const [query, setQuery] = useState('');
+  const filtered = useMemo(() => items.filter((item) => {
+    const matchesText = `${item.title} ${item.sourceLabel}`.toLowerCase().includes(query.trim().toLowerCase());
+    const matchesType = filter === 'All' || item.mediaType === filter.slice(0, -1).toLowerCase() || (filter === 'Audio' && item.mediaType === 'audio');
+    return matchesText && matchesType;
+  }), [filter, items, query]);
+  const groups = filtered.reduce<Record<string, HistoryItemModel[]>>((result, item) => ({ ...result, [item.dateLabel]: [...(result[item.dateLabel] ?? []), item] }), {});
 
-export function HistoryGrid({
-  items,
-  onOpenItem,
-  onRetryItem,
-  onShareItem,
-  onToggleItem,
-  selectedIds = [],
-  selecting = false,
-}: Pick<
-  HistoryScreenProps,
-  | 'items'
-  | 'onOpenItem'
-  | 'onRetryItem'
-  | 'onShareItem'
-  | 'onToggleItem'
-  | 'selectedIds'
-  | 'selecting'
->) {
-  const groups = items.reduce<Record<string, HistoryItemModel[]>>((result, item) => {
-    result[item.dateLabel] = [...(result[item.dateLabel] ?? []), item];
-    return result;
-  }, {});
-
-  return (
-    <Stack gap="lg">
-      {Object.entries(groups).map(([dateLabel, groupItems]) => (
-        <Stack gap="sm" key={dateLabel}>
-          <Text accessibilityRole="header" variant="label">
-            {dateLabel}
-          </Text>
-          <ResponsiveGrid>
-            {groupItems.map((item) => (
-              <HistoryItem
-                item={item}
-                key={item.id}
-                onOpen={onOpenItem}
-                onRetry={onRetryItem}
-                onShare={onShareItem}
-                onToggle={onToggleItem}
-                selected={selectedIds.includes(item.id)}
-                selecting={selecting}
-              />
-            ))}
-          </ResponsiveGrid>
-        </Stack>
-      ))}
-    </Stack>
-  );
-}
-
-export function HistoryScreen({
-  items,
-  notice,
-  onDeleteSelected,
-  onOpenItem,
-  onRetryItem,
-  onSelect,
-  onShareItem,
-  onToggleItem,
-  selectedIds = [],
-  selecting = false,
-}: HistoryScreenProps) {
-  return (
-    <Screen scroll>
-      <Stack gap="lg">
-        <PageHeader
-          action={(
-            <Button
-              accessibilityLabel="Select downloads"
-              label="Select"
-              onPress={onSelect}
-              variant="secondary"
-            />
-          )}
-          subtitle="Stored only on this device"
-          title="History"
-        />
-        {notice ? <Text color="textMuted">{notice}</Text> : null}
-        {selecting ? (
-          <SelectionBar onDelete={onDeleteSelected} selectedIds={selectedIds} />
-        ) : null}
-        {items.length === 0 ? (
-          <EmptyHistory />
-        ) : (
-          <HistoryGrid
-            items={items}
-            onOpenItem={onOpenItem}
-            onRetryItem={onRetryItem}
-            onShareItem={onShareItem}
-            onToggleItem={onToggleItem}
-            selectedIds={selectedIds}
-            selecting={selecting}
-          />
-        )}
-      </Stack>
-    </Screen>
-  );
+  return <Screen scroll><Stack gap="lg">
+    <PageHeader action={<Button accessibilityLabel="Select downloads" label={selecting ? 'Done' : 'Select'} onPress={onSelect} variant="ghost" />}
+      subtitle="Finished activity on this device" title="History" />
+    {notice ? <Text color="textMuted">{notice}</Text> : null}
+    <Inline gap="sm" style={{ backgroundColor: colors.surfaceMuted, borderRadius: radius.control, paddingHorizontal: 12 }}>
+      <Icon color="textMuted" name="search" size={18} /><TextInput accessibilityLabel="Search history" onChangeText={setQuery} placeholder="Search history…"
+        placeholderTextColor={colors.textMuted} style={{ color: colors.text, flex: 1, minHeight: 44 }} value={query} />
+    </Inline>
+    <ChoiceBar accessibilityLabel="History filters" choices={([
+      { label: 'All', value: 'All' }, { label: 'Videos', value: 'Videos' },
+      { label: 'Images', value: 'Images' }, { label: 'Audio', value: 'Audio' },
+    ] as const)} onChange={setFilter} value={filter} />
+    {selecting ? <Surface tone="surfaceMuted"><Stack gap="sm"><Text variant="label">{selectedIds.length} selected</Text>
+      <Inline gap="sm" wrap><Button accessibilityLabel="Remove selected from history" label="Remove history" onPress={() => onDeleteSelected?.(selectedIds, 'history-only')} variant="secondary" />
+        <Button accessibilityLabel="Delete selected from device and history" label="Delete files" onPress={() => onDeleteSelected?.(selectedIds, 'device-and-history')} variant="danger" /></Inline></Stack></Surface> : null}
+    {filtered.length === 0 ? <EmptyState detail="Completed and failed downloads will appear here." icon="history" title="Nothing saved yet" />
+      : Object.entries(groups).map(([date, group]) => <Stack gap="sm" key={date}><Text variant="label">{date}</Text>{group.map((item) =>
+        <HistoryItem item={item} key={item.id} onOpen={onOpenItem} onRetry={onRetryItem} onShare={onShareItem} onToggle={onToggleItem}
+          selected={selectedIds.includes(item.id)} selecting={selecting} />)}</Stack>)}
+  </Stack></Screen>;
 }

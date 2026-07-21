@@ -1,37 +1,24 @@
+import { useRouter } from 'expo-router';
 import { useDownloads } from '../../src/downloads/context';
 import { HomeScreen } from '../../src/features/home/home';
 
-function downloadDebug(event: string, details?: Record<string, unknown>) {
-  if (process.env.NODE_ENV === 'test') return;
-  if (details) console.log(`[iMediaSave][route] ${event}`, details);
-  else console.log(`[iMediaSave][route] ${event}`);
-}
-
 export default function HomeRoute() {
   const downloads = useDownloads();
+  const router = useRouter();
   const { home } = downloads;
-  const runAction = (label: string, action: () => Promise<unknown> | void) => {
-    downloadDebug(`${label}: start`, { phase: home.phase, jobId: home.jobId });
+  const runAction = (action: () => Promise<unknown> | void) => {
     try {
-      void Promise.resolve(action())
-        .then(() => downloadDebug(`${label}: complete`))
-        .catch((error: unknown) => {
-          downloadDebug(`${label}: failed`, {
-            message: error instanceof Error ? error.message : 'unknown',
-          });
-        });
-    } catch (error) {
-      downloadDebug(`${label}: threw synchronously`, {
-        message: error instanceof Error ? error.message : 'unknown',
-      });
+      void Promise.resolve(action()).catch(() => undefined);
+    } catch {
+      // DownloadProvider converts route-facing failures into visible notices.
     }
   };
-
   const primary = () => {
-    if (home.phase === 'ready' || home.phase === 'link_detected') return downloads.pasteAndDownload();
+    if (home.phase === 'link_detected') return downloads.pasteAndDownload();
     if ((home.phase === 'complete' || home.phase === 'duplicate') && home.assetUri) return downloads.open(home.assetUri);
     if (home.phase === 'duplicate') return downloads.downloadAgain();
     if ((home.phase === 'failed' || home.phase === 'paused_offline') && home.jobId) return downloads.retry(home.jobId);
+    if (home.phase === 'failed') return downloads.pasteAndDownload();
     if (home.jobId) return downloads.cancel(home.jobId);
     return undefined;
   };
@@ -43,16 +30,9 @@ export default function HomeRoute() {
     return undefined;
   };
 
-  return (
-    <HomeScreen
-      model={home}
-      onChooseMedia={(selection) => {
-        const jobId = home.jobId;
-        if (jobId) runAction('chooseMedia', () => downloads.chooseMedia(jobId, selection));
-      }}
-      onPrimaryAction={() => { runAction('primaryAction', primary); }}
-      onSecondaryAction={() => { runAction('secondaryAction', secondary); }}
-      onSubmitUrl={(url) => { runAction('submitUrl', () => downloads.startSharedUrl(url)); }}
-    />
-  );
+  return <HomeScreen model={home}
+    onChooseMedia={(selection) => { if (home.jobId) runAction(() => downloads.chooseMedia(home.jobId!, selection)); }}
+    onPrimaryAction={() => runAction(primary)}
+    onSecondaryAction={() => runAction(secondary)}
+    onSubmitUrl={async (url) => { if (await downloads.inspectUrl(url)) router.push('/media/preview'); }} />;
 }

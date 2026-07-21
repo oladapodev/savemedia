@@ -12,12 +12,12 @@ import { useIncomingShareAdapter } from '../src/platform/incoming-share';
 import { Button, Screen, Stack, Surface, Text } from '../src/ui';
 
 type ConsumptionOutcome =
-  | { kind: 'navigate'; title: string; detail: string; label: string }
+  | { kind: 'navigate'; title: string; detail: string; label: string; destination?: '/media/preview' | '/downloads' | '/history' }
   | { kind: 'rejected'; title: string; detail: string; label: string };
 
 const SHARE_CONFIRMATION_MS = 450;
 
-function outcomeFromStart(result: StartResult): ConsumptionOutcome {
+function outcomeFromStart(result: StartResult, duplicateInHistory = false): ConsumptionOutcome {
   if (result.kind === 'failed') {
     return {
       kind: 'rejected',
@@ -35,24 +35,25 @@ function outcomeFromStart(result: StartResult): ConsumptionOutcome {
   if (result.kind === 'selection_required') {
     return {
       kind: 'navigate', title: 'Choose shared media', label: 'Selection required',
-      detail: 'Choose one shared media item on Home.',
+      detail: 'Choose one shared media item in Downloads.', destination: '/downloads',
     };
   }
   if (result.kind === 'duplicate') {
     return {
       kind: 'navigate', title: 'Already saved', label: 'Duplicate',
-      detail: 'This media is already in your history.',
+      detail: duplicateInHistory ? 'This media is already in your history.' : 'This media is already being handled.',
+      destination: duplicateInHistory ? '/history' : '/downloads',
     };
   }
   if (result.job.status === 'complete') {
     return {
       kind: 'navigate', title: 'Saved to device', label: 'Saved',
-      detail: 'The shared media is saved in your library.',
+      detail: 'The shared media is saved in your library.', destination: '/history',
     };
   }
   return {
     kind: 'navigate', title: 'Download started', label: 'Queued',
-    detail: 'Your shared link is queued and continues on Home.',
+    detail: 'Your shared link is queued in Downloads.', destination: '/downloads',
   };
 }
 
@@ -97,11 +98,19 @@ export default function ShareRoute() {
           };
         })
       : normalized.kind === 'url'
-        ? consumeIncomingShareOnce(normalized.key, async () => (
-            outcomeFromStart(await downloads.startSharedUrl(normalized.url))
-          ))
+        ? consumeIncomingShareOnce(normalized.key, async () => {
+            if (downloads.settings.smartAutoSave) {
+              const result = await downloads.startSharedUrl(normalized.url);
+              return outcomeFromStart(result, result.kind === 'duplicate' && downloads.history.items.some(({ id }) => id === result.jobId));
+            }
+            const previewed = await downloads.inspectUrl(normalized.url);
+            return previewed
+              ? { kind: 'navigate' as const, title: 'Preview ready', label: 'Ready', detail: 'Review the media before downloading.', destination: '/media/preview' as const }
+              : { kind: 'rejected' as const, title: 'Cannot preview this share', label: 'Share rejected', detail: 'The shared link could not be previewed.' };
+          })
         : consumeIncomingShareOnce(normalized.key, async () => (
-            outcomeFromStart(await downloads.saveSharedFiles(normalized.items))
+            downloads.saveSharedFiles(normalized.items).then((result) => outcomeFromStart(result,
+              result.kind === 'duplicate' && downloads.history.items.some(({ id }) => id === result.jobId)))
           ));
     operation.then((next) => {
       if (active) setOutcome(next);
@@ -124,7 +133,7 @@ export default function ShareRoute() {
     const timer = setTimeout(() => {
       clearIncomingShareOnce(key, () => incoming.clearSharedPayloads())
         .then(() => {
-          if (active && outcome.kind === 'navigate') router.replace('/');
+          if (active && outcome.kind === 'navigate') router.replace(outcome.destination ?? '/');
         })
         .catch((error: unknown) => {
           if (active) {

@@ -92,6 +92,7 @@ describe('JobRepository', () => {
     await jobs.save(terminalFailure);
 
     await expect(new JobRepository(db).listActive()).resolves.toEqual([pausedJob, permissionFailure]);
+    await expect(new JobRepository(db).listTerminal()).resolves.toEqual([permissionFailure, terminalFailure]);
   });
 
   test('rejects corrupt or unsupported persisted metadata', async () => {

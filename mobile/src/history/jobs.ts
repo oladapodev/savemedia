@@ -74,6 +74,11 @@ export class JobRepository {
     ));
   }
 
+  async listTerminal(): Promise<DownloadJob[]> {
+    const rows = await this.database.getAllAsync<JobRow>('SELECT * FROM jobs ORDER BY updated_at DESC');
+    return rows.map(deserializeJob).filter((job) => job.status === 'failed' || job.status === 'cancelled');
+  }
+
   async remove(id: string): Promise<void> {
     await this.database.runAsync('DELETE FROM jobs WHERE id = ?', id);
   }

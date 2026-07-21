@@ -25,6 +25,8 @@ import {
   type HomeScreenModel,
 } from '../features/home/home';
 import type { SettingsModel } from '../features/settings/settings';
+import type { ActiveDownloadItemModel } from '../features/downloads/downloads';
+import type { MediaDetailModel } from '../features/media/detail';
 import { OwnershipNotice } from '../features/legal/notice';
 import {
   acceptOwnershipNotice,
@@ -55,8 +57,13 @@ export type DownloadProviderDependencies = {
 
 export type DownloadContextValue = {
   home: HomeScreenModel;
+  downloads: { items: ActiveDownloadItemModel[]; notice?: string };
   history: { items: HistoryItemModel[]; notice?: string };
+  preview: (MediaDetailModel & { sourceUrl: string }) | null;
   settings: SettingsModel;
+  inspectUrl(url: string): Promise<boolean>;
+  confirmPreview(quality: 'balanced' | 'original' | 'audio'): Promise<StartResult | { kind: 'action_failed' }>;
+  clearPreview(): void;
   pasteAndDownload(): Promise<PasteAndDownloadResult>;
   startSharedUrl(url: string): Promise<StartResult>;
   saveSharedFiles(files: readonly DirectMediaInput[]): Promise<StartResult>;
@@ -112,8 +119,9 @@ function settingsModel(settings: Settings, notice?: string): SettingsModel {
     quality: settings.quality === 'balanced'
       ? 'Balanced'
       : settings.quality === 'original' ? 'Original' : 'Audio',
-    saveLocation: 'Photos & media library',
+    saveLocation: 'Gallery',
     smartAutoSave: settings.smartAutoSave,
+    themeMode: settings.themeMode,
     ...(notice ? { notice } : {}),
   };
 }
@@ -122,16 +130,59 @@ function historyModel(entry: HistoryEntry): HistoryItemModel {
   const media = entry.mimeType.startsWith('image/')
     ? 'Image'
     : entry.mimeType.startsWith('audio/') ? 'Audio' : 'Video';
-  const size = entry.sizeBytes === null ? '' : ` · ${Math.max(1, Math.round(entry.sizeBytes / 1_048_576))} MB`;
+  const sizeLabel = entry.sizeBytes === null ? undefined : `${Math.max(0.1, entry.sizeBytes / 1_048_576).toFixed(1)} MB`;
+  const quality = entry.quality === 'balanced' ? 'Balanced' : entry.quality === 'original' ? 'Original' : 'Audio';
   return {
     id: entry.id,
     title: entry.filename,
     sourceLabel: entry.platform.charAt(0).toUpperCase() + entry.platform.slice(1),
-    detail: `${media}${size}`,
+    detail: `${media}${sizeLabel ? ` · ${sizeLabel}` : ''}`,
     dateLabel: entry.completedAt ? new Date(entry.completedAt).toLocaleDateString() : 'Pending',
     status: entry.status === 'failed' ? 'Failed' : 'Saved',
+    mediaType: media.toLowerCase() as 'video' | 'image' | 'audio',
+    ...(entry.thumbnailUrl ? { thumbnailUrl: entry.thumbnailUrl } : {}),
     ...(entry.deviceAssetRef ? { assetUri: entry.deviceAssetRef } : {}),
     sourceUrl: entry.sourceUrl,
+    quality,
+    ...(sizeLabel ? { sizeLabel } : {}),
+  };
+}
+
+function terminalHistoryModel(job: DownloadJob): HistoryItemModel | null {
+  if (job.status !== 'failed' && job.status !== 'cancelled') return null;
+  const mediaType = job.transfer?.mediaType ?? job.selection?.variant.mediaType ?? 'video';
+  const platform = job.transfer?.platform ?? 'Unknown';
+  return {
+    id: job.id,
+    title: job.transfer?.filename ?? job.preview?.title ?? 'Media download',
+    sourceLabel: platform.charAt(0).toUpperCase() + platform.slice(1),
+    detail: mediaType.charAt(0).toUpperCase() + mediaType.slice(1),
+    dateLabel: 'Recent',
+    status: job.status === 'failed' ? 'Failed' : 'Cancelled',
+    mediaType,
+    retryable: job.status === 'failed' && job.failure.retryable,
+    sourceUrl: job.sourceUrl,
+  };
+}
+
+function activeDownloadModel(job: DownloadJob): ActiveDownloadItemModel | null {
+  if (job.status === 'complete' || job.status === 'failed' || job.status === 'cancelled') return null;
+  const progress = downloadProgressPercent(job.progress);
+  const choices = job.status === 'selection_required' ? job.preview.items.flatMap((item, itemIndex) => item.variants.map((variant, variantIndex) => {
+    const quality: DownloadSelection['quality'] = variant.mediaType === 'audio' ? 'audio' : variant.mediaType === 'image' ? 'original' : 'balanced';
+    const detail = variant.mediaType === 'video' && variant.height ? `${variant.height}p video` : variant.mediaType.charAt(0).toUpperCase() + variant.mediaType.slice(1);
+    return { id: `${item.id}:${variant.id}`, label: job.preview.items.length > 1 ? `Item ${itemIndex + 1} · ${detail}` : detail,
+      selection: { itemId: item.id, quality, variant } };
+  })) : undefined;
+  return {
+    id: job.id,
+    title: job.transfer?.filename ?? job.preview?.title ?? 'Preparing media',
+    platform: job.transfer?.platform ?? 'iMediaSave',
+    status: job.status === 'paused_offline' ? 'Waiting for connection'
+      : job.status === 'selection_required' ? 'Selection required'
+      : job.status.charAt(0).toUpperCase() + job.status.slice(1),
+    ...(progress === undefined ? {} : { progress }),
+    ...(choices?.length ? { choices } : {}),
   };
 }
 
@@ -290,6 +341,10 @@ function providerUnmountedError(): Error {
   return new Error('Download provider unmounted before initialization completed.');
 }
 
+function startResultJobStatus(result: StartResult): string | undefined {
+  return 'job' in result ? result.job?.status : undefined;
+}
+
 function downloadDebug(event: string, details?: Record<string, unknown>) {
   if (process.env.NODE_ENV === 'test') return;
   if (details) console.log(`[iMediaSave][downloads] ${event}`, details);
@@ -325,6 +380,8 @@ export function DownloadProvider({
   const [settings, setSettings] = useState<Settings>(settingsRef.current);
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
   const [jobs, setJobs] = useState<DownloadJob[]>([]);
+  const [terminalJobs, setTerminalJobs] = useState<DownloadJob[]>([]);
+  const [preview, setPreview] = useState<(MediaDetailModel & { sourceUrl: string }) | null>(null);
   const [homeTransient, setHomeTransient] = useState<HomeTransient | null>(null);
   const [historyNotice, setHistoryNotice] = useState<string>();
   const [settingsNotice, setSettingsNotice] = useState<string>();
@@ -401,18 +458,24 @@ export function DownloadProvider({
 
     try {
       // Read history before hydrating jobs so an unread database never starts persisted work.
-      const savedEntries = await repositories.history.list();
+      await repositories.history.list();
+      await repositories.jobs.listTerminal();
       if (!mountedRef.current) throw providerUnmountedError();
 
       jobProcessingAllowedRef.current = true;
       await controller.reconcile();
       if (!mountedRef.current) throw providerUnmountedError();
 
+      const reconciledEntries = await repositories.history.list();
+      const reconciledTerminalJobs = await repositories.jobs.listTerminal();
+      if (!mountedRef.current) throw providerUnmountedError();
+
       const cleanup = await files.cleanupTemporary(preservedTemporaryUris(controller.list()));
       if (!mountedRef.current) throw providerUnmountedError();
 
-      setEntries(savedEntries);
+      setEntries(reconciledEntries);
       setJobs(controller.list());
+      setTerminalJobs(reconciledTerminalJobs);
       if (cleanup.failed.length) setSettingsNotice(`${cleanup.failed.length} temporary file could not be removed.`);
       phaseRef.current = 'ready';
       setOwnershipNoticeVisible(false);
@@ -421,7 +484,7 @@ export function DownloadProvider({
       failInitialization(error);
       throw error;
     }
-  }, [controller, failInitialization, files, repositories.history, resolveReadinessWaiters]);
+  }, [controller, failInitialization, files, repositories.history, repositories.jobs, resolveReadinessWaiters]);
 
   const runInitialization = useCallback(async () => {
     if (!mountedRef.current) throw providerUnmountedError();
@@ -499,6 +562,9 @@ export function DownloadProvider({
     const unsubscribe = controller.subscribe((job) => {
       if (!mountedRef.current || !jobProcessingAllowedRef.current) return;
       setJobs(controller.list());
+      setTerminalJobs((current) => job.status === 'failed' || job.status === 'cancelled'
+        ? [job, ...current.filter((candidate) => candidate.id !== job.id)]
+        : current.filter((candidate) => candidate.id !== job.id));
       if (job.status === 'complete') {
         refreshHistory().catch(() => {
           if (mountedRef.current) setHistoryNotice('Saved history could not be refreshed.');
@@ -579,6 +645,47 @@ export function DownloadProvider({
     }
   }, [initializationRetrying, startInitialization]);
 
+  const inspectUrl = useCallback(async (url: string): Promise<boolean> => {
+    try {
+      await requireOwnershipAcceptance();
+      const result = await api.preview(url.trim());
+      if (!mountedRef.current) throw providerUnmountedError();
+      if (result.kind === 'failure') {
+        setHomeTransient({ kind: 'error', message: result.message });
+        setPreview(null);
+        return false;
+      }
+      setHomeTransient(null);
+      setPreview({
+        id: 'preview',
+        sourceUrl: result.url,
+        title: result.title ?? 'Media preview',
+        platform: result.platform.charAt(0).toUpperCase() + result.platform.slice(1),
+        mediaType: result.mediaType ? result.mediaType.charAt(0).toUpperCase() + result.mediaType.slice(1) : 'Media',
+        ...(result.thumbnail ? { thumbnailUrl: result.thumbnail } : {}),
+        quality: settingsRef.current.quality === 'balanced' ? 'Balanced' : settingsRef.current.quality === 'original' ? 'Original' : 'Audio',
+      });
+      return true;
+    } catch (error) {
+      if (mountedRef.current) setHomeTransient({ kind: 'error', message: errorMessage(error, 'The link could not be previewed.') });
+      return false;
+    }
+  }, [api, requireOwnershipAcceptance]);
+
+  const confirmPreview = useCallback(async (quality: 'balanced' | 'original' | 'audio') => {
+    const draft = preview;
+    if (!draft) return { kind: 'action_failed' as const };
+    try {
+      await requireOwnershipAcceptance();
+      const result = await controller.startFromText(draft.sourceUrl, quality);
+      if (mountedRef.current && (result.kind === 'started' || result.kind === 'selection_required' || result.kind === 'duplicate')) setPreview(null);
+      return await applyStartResult(result);
+    } catch (error) {
+      if (mountedRef.current) setHomeTransient({ kind: 'error', message: errorMessage(error, 'The download could not be started.') });
+      return { kind: 'action_failed' as const };
+    }
+  }, [applyStartResult, controller, preview, requireOwnershipAcceptance]);
+
   const pasteAndDownload = useCallback(async (): Promise<PasteAndDownloadResult> => {
     downloadDebug('pasteAndDownload start');
     try {
@@ -591,7 +698,7 @@ export function DownloadProvider({
       downloadDebug('pasteAndDownload clipboard read complete', { length: text.length });
       lastClipboardText.current = text;
       const result = await controller.startFromText(text, settingsRef.current.quality);
-      downloadDebug('pasteAndDownload controller complete', { kind: result.kind, jobStatus: result.job?.status });
+      downloadDebug('pasteAndDownload controller complete', { kind: result.kind, jobStatus: startResultJobStatus(result) });
       return await applyStartResult(result);
     } catch (error) {
       downloadDebug('pasteAndDownload failed', {
@@ -607,7 +714,7 @@ export function DownloadProvider({
     await requireOwnershipAcceptance();
     if (!mountedRef.current) throw providerUnmountedError();
     const result = await controller.startFromText(url, settingsRef.current.quality);
-    downloadDebug('startSharedUrl controller complete', { kind: result.kind, jobStatus: result.job?.status });
+    downloadDebug('startSharedUrl controller complete', { kind: result.kind, jobStatus: startResultJobStatus(result) });
     return applyStartResult(result);
   }, [applyStartResult, controller, requireOwnershipAcceptance]);
 
@@ -616,7 +723,7 @@ export function DownloadProvider({
     await requireOwnershipAcceptance();
     if (!mountedRef.current) throw providerUnmountedError();
     const result = await controller.startFromDirectFiles(sharedFiles);
-    downloadDebug('saveSharedFiles controller complete', { kind: result.kind, jobStatus: result.job?.status });
+    downloadDebug('saveSharedFiles controller complete', { kind: result.kind, jobStatus: startResultJobStatus(result) });
     return applyStartResult(result);
   }, [applyStartResult, controller, requireOwnershipAcceptance]);
 
@@ -681,6 +788,13 @@ export function DownloadProvider({
         const entry = entries.find((candidate) => candidate.id === id)
           ?? await repositories.history.findByJobId(id);
         if (!entry) {
+          const terminal = terminalJobs.find((candidate) => candidate.id === id);
+          if (terminal) {
+            await repositories.jobs.remove(id);
+            outcome.deletedIds.push(id);
+            if (mountedRef.current) setTerminalJobs((current) => current.filter((candidate) => candidate.id !== id));
+            continue;
+          }
           outcome.failures.push({ id, kind: 'history_error', deviceDeleted: false });
           continue;
         }
@@ -707,7 +821,7 @@ export function DownloadProvider({
       setHistoryNotice(unexpectedNotice ?? (outcome.failures.length ? `${outcome.failures.length} item could not be removed.` : undefined));
     }
     return outcome;
-  }, [entries, files, repositories.history, requireOwnershipAcceptance]);
+  }, [entries, files, repositories.history, repositories.jobs, requireOwnershipAcceptance, terminalJobs]);
 
   const updateSettings = useCallback(async (
     patch: Partial<Pick<Settings, 'quality' | 'smartAutoSave' | 'alerts' | 'allowCellular' | 'themeMode'>>,
@@ -746,8 +860,16 @@ export function DownloadProvider({
 
   const value = useMemo<DownloadContextValue>(() => ({
     home: homeModel(jobs, homeTransient),
-    history: { items: entries.map(historyModel), ...(historyNotice ? { notice: historyNotice } : {}) },
+    downloads: { items: jobs.map(activeDownloadModel).filter((item): item is ActiveDownloadItemModel => Boolean(item)) },
+    history: {
+      items: [...entries.map(historyModel), ...terminalJobs.map(terminalHistoryModel).filter((item): item is HistoryItemModel => Boolean(item))],
+      ...(historyNotice ? { notice: historyNotice } : {}),
+    },
+    preview,
     settings: settingsModel(settings, settingsNotice),
+    inspectUrl,
+    confirmPreview,
+    clearPreview: () => setPreview(null),
     pasteAndDownload,
     startSharedUrl,
     saveSharedFiles,
@@ -770,12 +892,12 @@ export function DownloadProvider({
         if (mountedRef.current) setHistoryNotice(error instanceof Error ? error.message : 'The saved file could not be opened.');
       }
     },
-  }), [cancel, chooseMedia, cleanupTemporary, deleteHistory, discardIncomingShare, downloadAgain, entries, files, historyNotice, homeTransient, jobs, pasteAndDownload, requestSaveLocationAccess, retry, saveSharedFiles, settings, settingsNotice, startSharedUrl, updateSettings]);
+  }), [cancel, chooseMedia, cleanupTemporary, confirmPreview, deleteHistory, discardIncomingShare, downloadAgain, entries, files, historyNotice, homeTransient, inspectUrl, jobs, pasteAndDownload, preview, requestSaveLocationAccess, retry, saveSharedFiles, settings, settingsNotice, startSharedUrl, terminalJobs, updateSettings]);
 
   return (
-    <DownloadContext.Provider value={value}>
-      {children}
-      <AppThemeProvider mode={settings.themeMode}>
+    <AppThemeProvider mode={settings.themeMode}>
+      <DownloadContext.Provider value={value}>
+        {children}
         <OwnershipNotice
           accepting={ownershipNoticeAccepting}
           blockingError={initializationError}
@@ -785,8 +907,8 @@ export function DownloadProvider({
           retrying={initializationRetrying}
           visible={ownershipNoticeVisible}
         />
-      </AppThemeProvider>
-    </DownloadContext.Provider>
+      </DownloadContext.Provider>
+    </AppThemeProvider>
   );
 }
 

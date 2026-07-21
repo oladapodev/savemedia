@@ -1,18 +1,23 @@
 import { fireEvent, render, userEvent } from '@testing-library/react-native';
-import { Text } from 'react-native';
 
 import { AppThemeProvider } from '../ui';
+import type { HomeScreenModel } from '../features/home/home';
 
-const mockPasteAndDownload = jest.fn();
+const mockInspectUrl = jest.fn().mockResolvedValue(true);
 const mockStartSharedUrl = jest.fn().mockResolvedValue(undefined);
 const mockDeleteHistory = jest.fn().mockResolvedValue({ deletedIds: ['one'], failures: [] });
 const mockUpdateSettings = jest.fn().mockResolvedValue(undefined);
 const mockCleanupTemporary = jest.fn().mockResolvedValue(undefined);
 const mockRequestSaveLocationAccess = jest.fn().mockResolvedValue(undefined);
+const mockPasteAndDownload = jest.fn().mockResolvedValue(undefined);
 const mockPush = jest.fn();
+const readyHome: HomeScreenModel = {
+  cardDetail: 'Copy a public link.', cardTitle: 'Save media from a link', phase: 'ready',
+  primaryAction: { label: 'Paste & download' }, statusDetail: 'Clipboard on tap.', statusText: 'Ready',
+};
+let mockHome = readyHome;
 let capturedHomeProps: {
   onPrimaryAction?: () => void;
-  onSecondaryAction?: () => void;
   onSubmitUrl?: (url: string) => Promise<void> | void;
 } | null = null;
 
@@ -23,26 +28,28 @@ jest.mock('expo-router', () => ({
 jest.mock('../../src/features/home/home', () => ({
   HomeScreen: (props: unknown) => {
     capturedHomeProps = props as typeof capturedHomeProps;
-    return <Text>home</Text>;
+    const { Text: MockText } = require('react-native') as typeof import('react-native');
+    return <MockText>home</MockText>;
   },
 }));
 
 jest.mock('./context', () => ({
   useDownloads: () => ({
-    home: {
-      cardDetail: 'Copy a public link.', cardTitle: 'Save media from a link', phase: 'ready',
-      primaryAction: { label: 'Paste & download' }, statusDetail: 'Clipboard on tap.', statusText: 'Ready',
-    },
+    home: mockHome,
     history: {
       items: [{
         id: 'one', title: 'one.mp4', sourceLabel: 'Instagram', detail: 'Video', dateLabel: 'Today',
         status: 'Saved', assetUri: 'ph://one', sourceUrl: 'https://instagram.com/reel/one',
       }],
     },
+    downloads: { items: [] },
+    preview: null,
     settings: {
       allowCellular: true, appVersion: '1.0.0', notifications: true,
-      quality: 'Balanced', saveLocation: 'Photos & media library', smartAutoSave: true,
+      quality: 'Balanced', saveLocation: 'Gallery', smartAutoSave: true, themeMode: 'system',
     },
+    inspectUrl: mockInspectUrl,
+    confirmPreview: jest.fn(), clearPreview: jest.fn(),
     pasteAndDownload: mockPasteAndDownload,
     chooseMedia: jest.fn(), cancel: jest.fn(), retry: jest.fn(), deleteHistory: mockDeleteHistory, updateSettings: mockUpdateSettings,
     downloadAgain: jest.fn(), cleanupTemporary: mockCleanupTemporary,
@@ -62,22 +69,34 @@ async function renderRoute(Route: React.ComponentType) {
 beforeEach(() => jest.clearAllMocks());
 beforeEach(() => {
   capturedHomeProps = null;
+  mockHome = readyHome;
 });
 
-test('thin Home route renders the live provider model and dispatches paste intent', async () => {
+test('thin Home route inspects the typed URL and opens preview', async () => {
   const view = await renderRoute(HomeRoute);
   expect(view.getByText('home')).toBeTruthy();
-  expect(capturedHomeProps?.onPrimaryAction?.()).toBeUndefined();
+  await capturedHomeProps?.onSubmitUrl?.('https://example.com/shared');
+  expect(mockInspectUrl).toHaveBeenCalledWith('https://example.com/shared');
+  expect(mockPush).toHaveBeenCalledWith('/media/preview');
+});
+
+test('thin Home route stays home when preview fails', async () => {
+  mockInspectUrl.mockResolvedValueOnce(false);
+  const view = await renderRoute(HomeRoute);
+  expect(view.getByText('home')).toBeTruthy();
+  await capturedHomeProps?.onSubmitUrl?.('https://example.com/shared');
+  expect(mockPush).not.toHaveBeenCalled();
+});
+
+test('thin Home route gives transient failures a working paste action', async () => {
+  mockHome = {
+    cardDetail: 'Try another public link.', cardTitle: 'Invalid link', phase: 'failed',
+    primaryAction: { label: 'Paste another link' }, statusDetail: 'Clipboard on tap.', statusText: 'No link found',
+  };
+  const view = await renderRoute(HomeRoute);
+  expect(view.getByText('home')).toBeTruthy();
+  capturedHomeProps?.onPrimaryAction?.();
   expect(mockPasteAndDownload).toHaveBeenCalledTimes(1);
-});
-
-test('thin Home route ignores provider-unmounted submit rejections', async () => {
-  mockStartSharedUrl.mockRejectedValueOnce(new Error('Download provider unmounted before initialization completed.'));
-  const view = await renderRoute(HomeRoute);
-  expect(view.getByText('home')).toBeTruthy();
-
-  expect(capturedHomeProps?.onSubmitUrl?.('https://example.com/shared')).toBeUndefined();
-  expect(mockStartSharedUrl).toHaveBeenCalledWith('https://example.com/shared');
 });
 
 test('thin History route dispatches an explicit live deletion choice', async () => {
@@ -93,12 +112,14 @@ test('thin Settings route maps live toggles to persisted settings patches', asyn
   const view = await renderRoute(SettingsRoute);
   fireEvent(view.getByRole('switch', { name: 'Completion notifications' }), 'valueChange', false);
   expect(mockUpdateSettings).toHaveBeenCalledWith({ alerts: false });
-  await userEvent.setup().press(view.getByRole('button', { name: 'Change default quality' }));
+  await userEvent.setup().press(view.getByRole('button', { name: 'Original' }));
   expect(mockUpdateSettings).toHaveBeenCalledWith({ quality: 'original' });
-  await userEvent.setup().press(view.getByRole('button', { name: 'Clear temporary files' }));
+  await userEvent.setup().press(view.getByRole('link', { name: 'Clear temporary files' }));
   expect(mockCleanupTemporary).toHaveBeenCalledTimes(1);
-  await userEvent.setup().press(view.getByRole('button', { name: 'Manage save location access' }));
+  await userEvent.setup().press(view.getByRole('link', { name: 'Manage save location access' }));
   expect(mockRequestSaveLocationAccess).toHaveBeenCalledTimes(1);
+  await userEvent.setup().press(view.getByRole('button', { name: 'Dark' }));
+  expect(mockUpdateSettings).toHaveBeenCalledWith({ themeMode: 'dark' });
   await userEvent.setup().press(view.getByRole('link', { name: 'Open Privacy Policy' }));
   await userEvent.setup().press(view.getByRole('link', { name: 'Open Disclaimer' }));
   expect(mockPush).toHaveBeenNthCalledWith(1, '/privacy');

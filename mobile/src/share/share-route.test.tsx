@@ -10,8 +10,11 @@ const mockClear = jest.fn();
 const mockStartSharedUrl = jest.fn();
 const mockSaveSharedFiles = jest.fn();
 const mockDiscardIncomingShare = jest.fn();
+const mockInspectUrl = jest.fn();
 const mockDownloads = {
+  settings: { smartAutoSave: true },
   startSharedUrl: mockStartSharedUrl,
+  inspectUrl: mockInspectUrl,
   saveSharedFiles: mockSaveSharedFiles,
   discardIncomingShare: mockDiscardIncomingShare,
 };
@@ -77,13 +80,14 @@ beforeEach(() => {
   jest.clearAllMocks();
   jest.useFakeTimers();
   mockDiscardIncomingShare.mockResolvedValue(undefined);
+  mockDownloads.settings.smartAutoSave = true;
 });
 
 afterEach(() => {
   jest.useRealTimers();
 });
 
-test('consumes a shared URL once, truthfully confirms a queued download, then clears and routes home', async () => {
+test('consumes a shared URL once, truthfully confirms a queued download, then opens Downloads', async () => {
   mockIncomingShare = urlShare('https://example.com/route-one');
   let finish!: (value: unknown) => void;
   mockStartSharedUrl.mockReturnValue(new Promise((resolve) => { finish = resolve; }));
@@ -98,19 +102,19 @@ test('consumes a shared URL once, truthfully confirms a queued download, then cl
   });
 
   expect(screen.getByRole('header', { name: 'Download started' })).toBeTruthy();
-  expect(screen.getByText('Your shared link is queued and continues on Home.')).toBeTruthy();
+  expect(screen.getByText('Your shared link is queued in Downloads.')).toBeTruthy();
   expect(mockClear).not.toHaveBeenCalled();
   await act(async () => { jest.runOnlyPendingTimers(); });
   expect(mockClear).toHaveBeenCalledTimes(1);
   expect(mockStartSharedUrl).toHaveBeenCalledTimes(1);
   expect(mockStartSharedUrl).toHaveBeenCalledWith('https://example.com/route-one');
-  expect(mockReplace).toHaveBeenCalledWith('/');
+  expect(mockReplace).toHaveBeenCalledWith('/downloads');
 
   expect(mockStartSharedUrl).toHaveBeenCalledTimes(1);
   expect(mockClear).toHaveBeenCalledTimes(1);
 });
 
-test('routes a recorded selection-required media set home without clearing its Home state', async () => {
+test('routes a recorded selection-required media set to Downloads', async () => {
   const first = mediaShare('content://share/selection-one');
   const second = mediaShare('content://share/selection-two');
   mockIncomingShare = {
@@ -128,7 +132,7 @@ test('routes a recorded selection-required media set home without clearing its H
   expect(mockClear).not.toHaveBeenCalled();
   await act(async () => { jest.runOnlyPendingTimers(); });
   expect(mockClear).toHaveBeenCalledTimes(1);
-  expect(mockReplace).toHaveBeenCalledWith('/');
+  expect(mockReplace).toHaveBeenCalledWith('/downloads');
   expect(mockSaveSharedFiles).toHaveBeenCalledWith(expect.arrayContaining([
     expect.objectContaining({ sourceUri: 'content://share/selection-one' }),
     expect.objectContaining({ sourceUri: 'content://share/selection-two' }),
@@ -185,7 +189,7 @@ test('awaits native queue consumption before navigating and surfaces a retryable
   expect(mockClear).toHaveBeenCalledTimes(1);
   expect(screen.getByText('Native share queue is busy.')).toBeTruthy();
   fireEvent.press(screen.getByRole('button', { name: 'Retry cleanup' }));
-  await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/'), { timeout: 1_500 });
+  await waitFor(() => expect(mockReplace).toHaveBeenCalledWith('/downloads'), { timeout: 1_500 });
   expect(mockClear).toHaveBeenCalledTimes(2);
 });
 

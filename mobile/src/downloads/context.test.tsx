@@ -16,6 +16,7 @@ const mockRepositories = {
   jobs: {
     save: jest.fn().mockResolvedValue(undefined),
     listActive: jest.fn().mockResolvedValue([]),
+    listTerminal: jest.fn().mockResolvedValue([]),
   },
   settings: {
     get: jest.fn().mockResolvedValue({

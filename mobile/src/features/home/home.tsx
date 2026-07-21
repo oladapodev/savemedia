@@ -1,76 +1,29 @@
 import { useState } from 'react';
-import { TextInput } from 'react-native';
+import { Image, TextInput, View, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import {
-  Button,
-  Icon,
-  Inline,
-  PageHeader,
-  ProgressBar,
-  Screen,
-  Stack,
-  Surface,
-  Text,
-  useTheme,
-  type ButtonVariant,
-} from '../../ui';
-import { DownloadCard } from './download-card';
+import { Button, Icon, Inline, ProgressBar, Screen, Stack, Surface, Text, radius, space, useTheme, type ButtonVariant } from '../../ui';
 import type { DownloadSelection } from '../../downloads/types';
+import { DownloadCard } from './download-card';
+import { PromoCarousel } from './promo-carousel';
 
 export type HomeScreenModel = {
-  cardDetail: string;
-  cardTitle: string;
-  fileName?: string;
-  jobId?: string;
-  assetUri?: string;
+  cardDetail: string; cardTitle: string; fileName?: string; jobId?: string; assetUri?: string;
   mediaChoices?: Array<{ id: string; label: string; selection: DownloadSelection }>;
-  phase:
-    | 'ready'
-    | 'link_detected'
-    | 'preparing'
-    | 'selection_required'
-    | 'duplicate'
-    | 'downloading'
-    | 'paused_offline'
-    | 'complete'
-    | 'failed';
-  primaryAction: HomeAction;
-  progress?: number;
-  secondaryAction?: HomeAction;
-  statusDetail: string;
-  statusText: string;
+  phase: 'ready' | 'link_detected' | 'preparing' | 'selection_required' | 'duplicate' | 'downloading' | 'paused_offline' | 'complete' | 'failed';
+  primaryAction: HomeAction; progress?: number; secondaryAction?: HomeAction; statusDetail: string; statusText: string;
 };
-
-export type HomeAction = {
-  label: string;
-  variant?: ButtonVariant;
-};
+export type HomeAction = { label: string; variant?: ButtonVariant };
 
 export const readyHomeModel: HomeScreenModel = {
-  cardDetail: 'Copy a public media link, then start when you are ready.',
-  cardTitle: 'Save media from a link',
-  phase: 'ready',
-  primaryAction: { label: 'Paste & download' },
-  statusDetail: 'Your clipboard is read only after you tap the button.',
-  statusText: 'Ready to download',
+  cardDetail: 'Copy a public media link, then start when you are ready.', cardTitle: 'Save media from a link', phase: 'ready',
+  primaryAction: { label: 'Paste & download' }, statusDetail: 'Your clipboard is read only after you tap Paste.', statusText: 'Ready to download',
 };
-
 export const downloadingHomeModel: HomeScreenModel = {
-  cardDetail: 'Preparing a balanced-quality copy for your device.',
-  cardTitle: 'Saving your media',
-  fileName: 'summer-reel.mp4',
-  phase: 'downloading',
-  primaryAction: { label: 'Cancel download', variant: 'secondary' },
-  progress: 42,
-  statusDetail: 'Your download can continue in the background.',
-  statusText: 'Download in progress',
+  cardDetail: 'Preparing a balanced-quality copy for your device.', cardTitle: 'Saving your media', fileName: 'summer-reel.mp4',
+  phase: 'downloading', primaryAction: { label: 'Cancel download', variant: 'secondary' }, progress: 42,
+  statusDetail: 'Your download can continue in the background.', statusText: 'Download in progress',
 };
-
-function downloadDebug(event: string, details?: Record<string, unknown>) {
-  if (process.env.NODE_ENV === 'test') return;
-  if (details) console.log(`[iMediaSave][home] ${event}`, details);
-  else console.log(`[iMediaSave][home] ${event}`);
-}
 
 type HomeScreenProps = {
   model: HomeScreenModel;
@@ -80,153 +33,118 @@ type HomeScreenProps = {
   onSubmitUrl?: (url: string) => Promise<void> | void;
 };
 
+function Benefit({ icon, label, tone }: { icon: 'bolt' | 'check' | 'lock'; label: string; tone: 'accent' | 'success' | 'warning' }) {
+  const { colors } = useTheme();
+  return <Surface padding="sm" tone="surfaceMuted" style={{ alignItems: 'center', flex: 1, minHeight: 82, justifyContent: 'center' }}>
+    <Stack gap="sm" style={{ alignItems: 'center' }}>
+      <Icon color={tone} name={icon} size={22} />
+      <Text style={{ color: colors.text, textAlign: 'center' }} variant="caption">{label}</Text>
+    </Stack>
+  </Surface>;
+}
+
+function Step({ detail, number, title }: { detail: string; number: number; title: string }) {
+  const { colors } = useTheme();
+  return <Inline gap="md" style={{ alignItems: 'flex-start' }}>
+    <View style={{ alignItems: 'center', backgroundColor: colors.accent, borderRadius: 16, height: 30, justifyContent: 'center', width: 30 }}>
+      <Text color="heroText" variant="label">{number}</Text>
+    </View>
+    <Stack gap="xs" grow><Text variant="label">{title}</Text><Text color="textMuted" variant="caption">{detail}</Text></Stack>
+  </Inline>;
+}
+
+export function getHomeFormDirection(width: number): 'column' | 'row' {
+  return width < 360 ? 'column' : 'row';
+}
+
+export function getHomeHeroTopPadding(topInset: number) {
+  return topInset + space.md;
+}
+
 export function ProgressCard({ progress }: { progress: number }) {
   const roundedProgress = Math.round(progress);
-
-  return (
-    <Surface>
-      <Stack gap="sm">
-        <Text variant="label">Downloading</Text>
-        <ProgressBar label="Download progress" value={roundedProgress} />
-        <Text
-          accessibilityElementsHidden
-          color="textMuted"
-          importantForAccessibility="no-hide-descendants"
-          variant="caption"
-        >
-          Downloading · {roundedProgress}%
-        </Text>
-      </Stack>
-    </Surface>
-  );
+  return <Surface><Stack gap="sm"><Text variant="label">Downloading</Text>
+    <ProgressBar label="Download progress" value={roundedProgress} />
+    <Text accessibilityElementsHidden color="textMuted" importantForAccessibility="no-hide-descendants" variant="caption">
+      Downloading · {roundedProgress}%
+    </Text>
+  </Stack></Surface>;
 }
 
 export function StatusNotice({ model }: { model: HomeScreenModel }) {
-  const icon = model.phase === 'failed'
-    ? 'warning'
-    : model.phase === 'complete'
-      ? 'check'
-      : model.phase === 'downloading'
-        ? 'download'
-        : 'info';
-
-  return (
-    <Surface accessibilityLabel={`Status: ${model.statusText}`} tone="surfaceMuted">
-      <Inline gap="md">
-        <Icon
-          color={model.phase === 'failed' ? 'warning' : 'accent'}
-          name={icon}
-        />
-        <Stack gap="xs" grow>
-          <Text variant="label">{model.statusText}</Text>
-          <Text color="textMuted" variant="caption">
-            {model.statusDetail}
-          </Text>
-        </Stack>
-      </Inline>
-    </Surface>
-  );
+  const icon = model.phase === 'failed' ? 'warning' : model.phase === 'complete' ? 'check' : model.phase === 'downloading' ? 'download' : 'info';
+  return <Surface accessibilityLabel={`Status: ${model.statusText}`} tone="surfaceMuted"><Inline gap="md">
+    <Icon color={model.phase === 'failed' ? 'warning' : 'accent'} name={icon} />
+    <Stack gap="xs" grow><Text variant="label">{model.statusText}</Text><Text color="textMuted" variant="caption">{model.statusDetail}</Text></Stack>
+  </Inline></Surface>;
 }
 
-export function HomeScreen({
-  model,
-  onChooseMedia,
-  onPrimaryAction,
-  onSecondaryAction,
-  onSubmitUrl,
-}: HomeScreenProps) {
+export function HomeScreen({ model, onChooseMedia, onPrimaryAction, onSecondaryAction, onSubmitUrl }: HomeScreenProps) {
   const { colors } = useTheme();
-  const [draftUrl, setDraftUrl] = useState('');
+  const { width } = useWindowDimensions();
+  const { top } = useSafeAreaInsets();
+  const formDirection = getHomeFormDirection(width);
+  const [url, setUrl] = useState('');
+  const [pasting, setPasting] = useState(false);
+  const [pasteError, setPasteError] = useState<string>();
 
-  const handlePaste = async () => {
-    downloadDebug('paste button clicked');
+  const paste = async () => {
+    setPasting(true);
+    setPasteError(undefined);
     try {
-      const clipboard = await (require('expo-clipboard') as typeof import('expo-clipboard')).getStringAsync();
-      downloadDebug('clipboard read complete', { length: clipboard.length });
-      setDraftUrl(clipboard);
-    } catch (error) {
-      downloadDebug('clipboard read failed', {
-        message: error instanceof Error ? error.message : 'unknown',
-      });
-      setDraftUrl('');
-    }
+      const value = await (require('expo-clipboard') as typeof import('expo-clipboard')).getStringAsync();
+      setUrl(value.trim());
+    } catch {
+      setPasteError('Could not read your clipboard. Paste the link manually and try again.');
+    } finally { setPasting(false); }
   };
 
-  const handleSubmit = () => {
-    const url = draftUrl.trim();
-    downloadDebug('download link clicked', { hasUrl: Boolean(url), urlLength: url.length });
-    if (!url) {
-      downloadDebug('download link ignored because the field is empty');
-      return;
-    }
-    downloadDebug('submitting url to route');
-    void onSubmitUrl?.(url);
-  };
-
-  return (
-    <Screen scroll>
-      <Stack gap="lg">
-        <PageHeader
-          subtitle="Private by default. No account required."
-          title="iMediaSave"
-        />
-        <Surface tone="surfaceMuted">
-          <Text variant="caption">
-            Save only content you own or have permission to download.
-          </Text>
-        </Surface>
-        <Surface level="raised" padding="lg">
-          <Stack gap="md">
-            <Stack gap="xs">
-              <Text variant="label">Paste link</Text>
-              <Text color="textMuted" variant="caption">
-                Paste a public link or type one directly, then use the download button below.
-              </Text>
-            </Stack>
-            <Inline gap="sm" wrap>
-              <TextInput
-                autoCapitalize="none"
-                autoCorrect={false}
-                placeholder="Paste a public link"
-                placeholderTextColor={colors.textMuted}
-                style={{
-                  backgroundColor: colors.surface,
-                  borderColor: colors.border,
-                  borderRadius: 14,
-                  borderWidth: 1,
-                  color: colors.text,
-                  flex: 1,
-                  minHeight: 52,
-                  minWidth: 180,
-                  paddingHorizontal: 16,
-                  paddingVertical: 12,
-                }}
-                value={draftUrl}
-                onChangeText={setDraftUrl}
-              />
-              <Button label="Paste" onPress={handlePaste} variant="secondary" />
-            </Inline>
-            <Button
-              disabled={!draftUrl.trim()}
-              label="Download link"
-              onPress={handleSubmit}
-            />
+  return <Screen contentContainerStyle={{ paddingHorizontal: 0, paddingTop: 0 }} edges={['left', 'right', 'bottom']} scroll>
+    <View testID="home-hero" style={{ backgroundColor: colors.accent, borderBottomLeftRadius: 28, borderBottomRightRadius: 28,
+      marginHorizontal: 0, overflow: 'hidden', paddingBottom: space.lg, paddingHorizontal: space.md, paddingTop: getHomeHeroTopPadding(top) }}>
+      <Stack gap="md" style={{ alignItems: 'center' }}>
+        <Image accessibilityLabel="iMediaSave logo" accessibilityRole="image" source={require('../../../assets/brand-logo.png')}
+          style={{ borderRadius: radius.card, height: 72, width: 72 }} />
+        <Text accessibilityRole="header" color="heroText" variant="display">iMediaSave</Text>
+        <Text color="heroText" style={{ maxWidth: 270, textAlign: 'center' }}>Download Instagram, TikTok and more media in seconds.</Text>
+        <Surface padding="sm" style={{ width: '100%' }}>
+          <Stack gap="sm">
+            <View style={{ flexDirection: formDirection, gap: space.sm, width: '100%' }}>
+              <TextInput autoCapitalize="none" autoCorrect={false} onChangeText={setUrl} placeholder="Paste link here…"
+                placeholderTextColor={colors.textMuted} value={url}
+                style={{ backgroundColor: colors.surfaceMuted, borderRadius: radius.control, color: colors.text,
+                  flex: formDirection === 'row' ? 1 : undefined, minHeight: 46, minWidth: 0, paddingHorizontal: 13,
+                  width: formDirection === 'column' ? '100%' : undefined }} />
+              <Button label="Paste" loading={pasting} onPress={paste}
+                style={{ alignSelf: 'stretch', minWidth: formDirection === 'row' ? 72 : 0 }} />
+            </View>
+            <Button disabled={!url.trim()} icon="download" label="Preview download" onPress={() => { void onSubmitUrl?.(url.trim()); }} />
+            {pasteError ? <Text accessibilityRole="alert" color="danger" variant="caption">{pasteError}</Text> : null}
           </Stack>
         </Surface>
-        <DownloadCard
-          model={model}
-          onChooseMedia={onChooseMedia}
-          onPrimaryAction={onPrimaryAction}
-          onSecondaryAction={onSecondaryAction}
-        />
-        {typeof model.progress === 'number' ? (
-          <ProgressCard progress={model.progress} />
-        ) : null}
-        <StatusNotice model={model} />
-        <Text color="textMuted" variant="caption">
-          Popular platforms and compatible public links.
-        </Text>
       </Stack>
-    </Screen>
-  );
+    </View>
+
+    <Stack gap="xl" style={{ padding: space.md }}>
+      {model.phase !== 'ready' ? <Stack gap="md">
+        <DownloadCard model={model} onChooseMedia={onChooseMedia} onPrimaryAction={onPrimaryAction} onSecondaryAction={onSecondaryAction} />
+        {typeof model.progress === 'number' ? <ProgressCard progress={model.progress} /> : null}
+        <StatusNotice model={model} />
+      </Stack> : null}
+      <Inline gap="md" justify="between">
+        <Benefit icon="bolt" label="Fast Downloads" tone="warning" />
+        <Benefit icon="check" label="High Quality" tone="success" />
+        <Benefit icon="lock" label="100% Secure" tone="accent" />
+      </Inline>
+
+      <PromoCarousel />
+
+      <Stack gap="lg"><Stack gap="xs"><Text variant="title">How it works</Text><Text color="textMuted" variant="caption">Simple steps to download supported public media.</Text></Stack>
+        <Step detail="Copy a public link from a supported platform." number={1} title="Copy link" />
+        <Step detail="Paste the link and review the real media preview." number={2} title="Paste & preview" />
+        <Step detail="Choose quality and save it to your device." number={3} title="Download" />
+      </Stack>
+      <Text color="textMuted" variant="caption">Save only content you own or have permission to download.</Text>
+    </Stack>
+  </Screen>;
 }

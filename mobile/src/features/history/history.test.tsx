@@ -17,6 +17,7 @@ const failedItem: HistoryItemModel = {
   id: 'failed-reel',
   status: 'Failed',
   title: 'Failed reel',
+  retryable: true,
 };
 
 function TestApp({ children }: { children: React.ReactNode }) {
@@ -33,9 +34,12 @@ test('history explains local storage and exposes selection', async () => {
   );
 
   expect(screen.getByRole('header', { name: 'History' })).toBeTruthy();
-  expect(screen.getByText('Stored only on this device')).toBeTruthy();
+  expect(screen.getByText('Finished activity on this device')).toBeTruthy();
   expect(screen.getByRole('button', { name: 'Select downloads' })).toBeTruthy();
-  expect(screen.getByText('Your saved downloads will appear here.')).toBeTruthy();
+  expect(
+    screen.getByText('Completed and failed downloads will appear here.'),
+  ).toBeTruthy();
+  expect(screen.getByLabelText('Nothing saved yet illustration')).toBeTruthy();
 });
 
 test('history items remain operable by name without relying on their thumbnails', async () => {
@@ -144,4 +148,9 @@ test('failed history items expose retry instead of saved-media controls', async 
   await user.press(screen.getByRole('button', { name: 'Retry Failed reel' }));
 
   expect(onRetryItem).toHaveBeenCalledWith(failedItem);
+});
+
+test('permanent failures do not expose a dead retry action', async () => {
+  await render(<TestApp><HistoryScreen items={[{ ...failedItem, retryable: false }]} /></TestApp>);
+  expect(screen.queryByRole('button', { name: 'Retry Failed reel' })).toBeNull();
 });

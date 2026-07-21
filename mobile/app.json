@@ -6,12 +6,23 @@
     "orientation": "portrait",
     "scheme": "imediasave",
     "userInterfaceStyle": "automatic",
+    "primaryColor": "#FA6E09",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FA6E09"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.imediasave.app"
     },
     "android": {
       "package": "com.imediasave.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FA6E09"
+      },
       "blockedPermissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
