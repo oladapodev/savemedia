@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { detectPlatform, SUPPORTED_PLATFORM_COPY } from '@/lib/platforms'
+import { proxiedThumbnailUrl } from '@/lib/thumbnail'
 
 // Platform-specific oEmbed endpoints
 const OEMBED_ENDPOINTS: Record<string, string> = {
@@ -135,7 +136,7 @@ function getYouTubeThumbnail(url: string): string | null {
       }
     }
     if (videoId) {
-      return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+      return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`
     }
     return null
   } catch {
@@ -310,6 +311,11 @@ export const Route = createFileRoute('/api/preview')({
           }
           if (!preview.providerName) {
             preview.providerName = platform
+          }
+
+          if (typeof preview.thumbnail === 'string') {
+            const thumbnailSecret = process.env.THUMBNAIL_PROXY_SECRET || process.env.COBALT_API_KEY || ''
+            preview.thumbnail = await proxiedThumbnailUrl(preview.thumbnail, request.url, thumbnailSecret)
           }
 
           // Always return success — even with minimal data the UI can show a usable preview

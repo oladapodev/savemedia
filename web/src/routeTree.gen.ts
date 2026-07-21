@@ -13,15 +13,16 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as HelpRouteImport } from './routes/help'
-import { Route as ContactRouteImport } from './routes/contact'
 import { Route as DownloaderRouteImport } from './routes/downloader'
 import { Route as DisclaimerRouteImport } from './routes/disclaimer'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as ProductsProductIdRouteImport } from './routes/products/$productId'
 import { Route as DocsApiRouteImport } from './routes/docs.api'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as ApiThumbnailRouteImport } from './routes/api.thumbnail'
 import { Route as ApiProxyDownloadRouteImport } from './routes/api.proxy-download'
 import { Route as ApiPreviewRouteImport } from './routes/api.preview'
 import { Route as ApiDownloadRouteImport } from './routes/api.download'
@@ -46,11 +47,6 @@ const HelpRoute = HelpRouteImport.update({
   path: '/help',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DownloaderRoute = DownloaderRouteImport.update({
   id: '/downloader',
   path: '/downloader',
@@ -59,6 +55,11 @@ const DownloaderRoute = DownloaderRouteImport.update({
 const DisclaimerRoute = DisclaimerRouteImport.update({
   id: '/disclaimer',
   path: '/disclaimer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogRoute = BlogRouteImport.update({
@@ -91,6 +92,11 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => BlogRoute,
 } as any)
+const ApiThumbnailRoute = ApiThumbnailRouteImport.update({
+  id: '/api/thumbnail',
+  path: '/api/thumbnail',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiProxyDownloadRoute = ApiProxyDownloadRouteImport.update({
   id: '/api/proxy-download',
   path: '/api/proxy-download',
@@ -110,16 +116,17 @@ const ApiDownloadRoute = ApiDownloadRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/blog': typeof BlogRouteWithChildren
+  '/contact': typeof ContactRoute
   '/disclaimer': typeof DisclaimerRoute
   '/downloader': typeof DownloaderRoute
-  '/privacy': typeof PrivacyRoute
   '/help': typeof HelpRoute
-  '/contact': typeof ContactRoute
+  '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/download': typeof ApiDownloadRoute
   '/api/preview': typeof ApiPreviewRoute
   '/api/proxy-download': typeof ApiProxyDownloadRoute
+  '/api/thumbnail': typeof ApiThumbnailRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/docs/api': typeof DocsApiRoute
   '/products/$productId': typeof ProductsProductIdRoute
@@ -127,16 +134,17 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/contact': typeof ContactRoute
   '/disclaimer': typeof DisclaimerRoute
   '/downloader': typeof DownloaderRoute
-  '/privacy': typeof PrivacyRoute
   '/help': typeof HelpRoute
-  '/contact': typeof ContactRoute
+  '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/download': typeof ApiDownloadRoute
   '/api/preview': typeof ApiPreviewRoute
   '/api/proxy-download': typeof ApiProxyDownloadRoute
+  '/api/thumbnail': typeof ApiThumbnailRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/docs/api': typeof DocsApiRoute
   '/products/$productId': typeof ProductsProductIdRoute
@@ -146,16 +154,17 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/blog': typeof BlogRouteWithChildren
+  '/contact': typeof ContactRoute
   '/disclaimer': typeof DisclaimerRoute
   '/downloader': typeof DownloaderRoute
-  '/privacy': typeof PrivacyRoute
   '/help': typeof HelpRoute
-  '/contact': typeof ContactRoute
+  '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/api/download': typeof ApiDownloadRoute
   '/api/preview': typeof ApiPreviewRoute
   '/api/proxy-download': typeof ApiProxyDownloadRoute
+  '/api/thumbnail': typeof ApiThumbnailRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/docs/api': typeof DocsApiRoute
   '/products/$productId': typeof ProductsProductIdRoute
@@ -166,16 +175,17 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/blog'
+    | '/contact'
     | '/disclaimer'
     | '/downloader'
-    | '/privacy'
     | '/help'
-    | '/contact'
+    | '/privacy'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/api/download'
     | '/api/preview'
     | '/api/proxy-download'
+    | '/api/thumbnail'
     | '/blog/$slug'
     | '/docs/api'
     | '/products/$productId'
@@ -183,16 +193,17 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/contact'
     | '/disclaimer'
     | '/downloader'
-    | '/privacy'
     | '/help'
-    | '/contact'
+    | '/privacy'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/api/download'
     | '/api/preview'
     | '/api/proxy-download'
+    | '/api/thumbnail'
     | '/blog/$slug'
     | '/docs/api'
     | '/products/$productId'
@@ -201,16 +212,17 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/blog'
+    | '/contact'
     | '/disclaimer'
     | '/downloader'
-    | '/privacy'
     | '/help'
-    | '/contact'
+    | '/privacy'
     | '/robots.txt'
     | '/sitemap.xml'
     | '/api/download'
     | '/api/preview'
     | '/api/proxy-download'
+    | '/api/thumbnail'
     | '/blog/$slug'
     | '/docs/api'
     | '/products/$productId'
@@ -220,16 +232,17 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BlogRoute: typeof BlogRouteWithChildren
+  ContactRoute: typeof ContactRoute
   DisclaimerRoute: typeof DisclaimerRoute
   DownloaderRoute: typeof DownloaderRoute
-  PrivacyRoute: typeof PrivacyRoute
   HelpRoute: typeof HelpRoute
-  ContactRoute: typeof ContactRoute
+  PrivacyRoute: typeof PrivacyRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiDownloadRoute: typeof ApiDownloadRoute
   ApiPreviewRoute: typeof ApiPreviewRoute
   ApiProxyDownloadRoute: typeof ApiProxyDownloadRoute
+  ApiThumbnailRoute: typeof ApiThumbnailRoute
   DocsApiRoute: typeof DocsApiRoute
   ProductsProductIdRoute: typeof ProductsProductIdRoute
 }
@@ -264,13 +277,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/downloader': {
       id: '/downloader'
       path: '/downloader'
@@ -283,6 +289,13 @@ declare module '@tanstack/react-router' {
       path: '/disclaimer'
       fullPath: '/disclaimer'
       preLoaderRoute: typeof DisclaimerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog': {
@@ -327,6 +340,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof BlogRoute
     }
+    '/api/thumbnail': {
+      id: '/api/thumbnail'
+      path: '/api/thumbnail'
+      fullPath: '/api/thumbnail'
+      preLoaderRoute: typeof ApiThumbnailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/proxy-download': {
       id: '/api/proxy-download'
       path: '/api/proxy-download'
@@ -366,16 +386,17 @@ const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BlogRoute: BlogRouteWithChildren,
+  ContactRoute: ContactRoute,
   DisclaimerRoute: DisclaimerRoute,
   DownloaderRoute: DownloaderRoute,
-  PrivacyRoute: PrivacyRoute,
   HelpRoute: HelpRoute,
-  ContactRoute: ContactRoute,
+  PrivacyRoute: PrivacyRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiDownloadRoute: ApiDownloadRoute,
   ApiPreviewRoute: ApiPreviewRoute,
   ApiProxyDownloadRoute: ApiProxyDownloadRoute,
+  ApiThumbnailRoute: ApiThumbnailRoute,
   DocsApiRoute: DocsApiRoute,
   ProductsProductIdRoute: ProductsProductIdRoute,
 }
