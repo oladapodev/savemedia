@@ -1,5 +1,10 @@
 # iMediaSave Mobile Downloader Design
 
+> [!NOTE]
+> This document may not reflect the current implementation.
+> See the final report for up-to-date state:
+> [Final Report](../reports/mobile-ui-redesign.md)
+
 **Status:** Approved
 **Date:** 2026-07-15
 **Product:** iMediaSave mobile app for Android and iOS
