@@ -1,4 +1,4 @@
-import { render, screen, userEvent } from '@testing-library/react-native';
+import { act, render, screen, userEvent } from '@testing-library/react-native';
 
 import { AppThemeProvider } from '../../ui';
 import { getDetailActionDirection, MediaDetailScreen } from './detail';
@@ -37,4 +37,10 @@ test('saved detail offers share and open in gallery without download again', asy
 test('saved detail stacks paired actions on narrow phones', () => {
   expect(getDetailActionDirection(320)).toBe('column');
   expect(getDetailActionDirection(390)).toBe('row');
+});
+
+test('preview replaces a failed remote thumbnail with a clear fallback', async () => {
+  await render(<AppThemeProvider mode="light"><MediaDetailScreen item={preview} mode="preview" /></AppThemeProvider>);
+  await act(async () => { screen.getByLabelText('Sunset vibes preview').props.onError(); });
+  expect(screen.getByLabelText('Sunset vibes preview unavailable')).toBeTruthy();
 });

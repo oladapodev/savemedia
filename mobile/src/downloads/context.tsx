@@ -182,6 +182,7 @@ function activeDownloadModel(job: DownloadJob): ActiveDownloadItemModel | null {
       : job.status === 'selection_required' ? 'Selection required'
       : job.status.charAt(0).toUpperCase() + job.status.slice(1),
     ...(progress === undefined ? {} : { progress }),
+    ...(job.transfer?.thumbnailUrl ? { thumbnailUrl: job.transfer.thumbnailUrl } : {}),
     ...(choices?.length ? { choices } : {}),
   };
 }

@@ -29,6 +29,11 @@ test('downloads shows a simple active queue with progress and cancel', async () 
   expect(onCancel).toHaveBeenCalledWith(item);
 });
 
+test('downloads shows transfer artwork when available', async () => {
+  await render(<AppThemeProvider mode="light"><DownloadsScreen items={[{ ...item, thumbnailUrl: 'https://images.example/sunset.jpg' }]} /></AppThemeProvider>);
+  expect(screen.getByLabelText('sunset-video.mp4 thumbnail')).toBeTruthy();
+});
+
 test('downloads has a useful empty state', async () => {
   await render(
     <AppThemeProvider mode="light">

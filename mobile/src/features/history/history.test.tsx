@@ -58,6 +58,7 @@ test('history items remain operable by name without relying on their thumbnails'
   );
 
   expect(screen.getByText('Today')).toBeTruthy();
+  expect(screen.getByLabelText('Today downloads')).toBeTruthy();
   expect(screen.getByText('Video · 1080p · 18 MB')).toBeTruthy();
 
   await user.press(screen.getByRole('button', { name: 'Open Summer reel' }));
@@ -65,6 +66,11 @@ test('history items remain operable by name without relying on their thumbnails'
 
   expect(onOpenItem).toHaveBeenCalledWith(item);
   expect(onShareItem).toHaveBeenCalledWith(item);
+});
+
+test('history shows a saved thumbnail when one is available', async () => {
+  await render(<TestApp><HistoryScreen items={[{ ...item, thumbnailUrl: 'https://images.example/summer.jpg' }]} /></TestApp>);
+  expect(screen.getByLabelText('Summer reel thumbnail')).toBeTruthy();
 });
 
 test('history selection exposes a labeled bulk action', async () => {

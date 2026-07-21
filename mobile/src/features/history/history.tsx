@@ -27,7 +27,7 @@ export function HistoryScreen({ items, notice, onDeleteSelected, onOpenItem, onR
   }), [filter, items, query]);
   const groups = filtered.reduce<Record<string, HistoryItemModel[]>>((result, item) => ({ ...result, [item.dateLabel]: [...(result[item.dateLabel] ?? []), item] }), {});
 
-  return <Screen scroll><Stack gap="lg">
+  return <Screen edges={['top', 'left', 'right']} scroll><Stack gap="lg">
     <PageHeader action={<Button accessibilityLabel="Select downloads" label={selecting ? 'Done' : 'Select'} onPress={onSelect} variant="ghost" />}
       subtitle="Finished activity on this device" title="History" />
     {notice ? <Text color="textMuted">{notice}</Text> : null}
@@ -43,8 +43,9 @@ export function HistoryScreen({ items, notice, onDeleteSelected, onOpenItem, onR
       <Inline gap="sm" wrap><Button accessibilityLabel="Remove selected from history" label="Remove history" onPress={() => onDeleteSelected?.(selectedIds, 'history-only')} variant="secondary" />
         <Button accessibilityLabel="Delete selected from device and history" label="Delete files" onPress={() => onDeleteSelected?.(selectedIds, 'device-and-history')} variant="danger" /></Inline></Stack></Surface> : null}
     {filtered.length === 0 ? <EmptyState detail="Completed and failed downloads will appear here." icon="history" title="Nothing saved yet" />
-      : Object.entries(groups).map(([date, group]) => <Stack gap="sm" key={date}><Text variant="label">{date}</Text>{group.map((item) =>
-        <HistoryItem item={item} key={item.id} onOpen={onOpenItem} onRetry={onRetryItem} onShare={onShareItem} onToggle={onToggleItem}
-          selected={selectedIds.includes(item.id)} selecting={selecting} />)}</Stack>)}
+      : Object.entries(groups).map(([date, group]) => <Stack gap="sm" key={date}><Text variant="label">{date}</Text>
+        <Surface accessibilityLabel={`${date} downloads`} padding="md">{group.map((item, index) =>
+          <HistoryItem item={item} key={item.id} last={index === group.length - 1} onOpen={onOpenItem} onRetry={onRetryItem}
+            onShare={onShareItem} onToggle={onToggleItem} selected={selectedIds.includes(item.id)} selecting={selecting} />)}</Surface></Stack>)}
   </Stack></Screen>;
 }

@@ -25,6 +25,16 @@ function isMediaType(value: unknown): value is MediaType {
   return value === 'video' || value === 'audio' || value === 'image';
 }
 
+function previewMediaType(value: unknown): MediaType | undefined {
+  if (isMediaType(value)) return value;
+  if (typeof value !== 'string') return undefined;
+  const normalized = value.toLowerCase();
+  if (/\b(photo|image|picture)\b/u.test(normalized)) return 'image';
+  if (/\b(audio|sound)\b/u.test(normalized)) return 'audio';
+  if (/\b(video|rich)\b/u.test(normalized)) return 'video';
+  return undefined;
+}
+
 function isPublicHttpUrl(value: unknown): value is string {
   if (typeof value !== 'string') return false;
   try {
@@ -92,7 +102,7 @@ function classifyWrapperFailure(
 function parsePreview(body: unknown): PreviewResult | null {
   if (!isRecord(body) || body.success !== true) return null;
   if (typeof body.platform !== 'string' || typeof body.url !== 'string') return null;
-  if (body.type !== undefined && !isMediaType(body.type)) return null;
+  const mediaType = previewMediaType(body.type);
   return {
     kind: 'preview',
     platform: body.platform,
@@ -100,7 +110,7 @@ function parsePreview(body: unknown): PreviewResult | null {
     ...(typeof body.title === 'string' ? { title: body.title } : {}),
     ...(typeof body.author === 'string' ? { author: body.author } : {}),
     ...(typeof body.thumbnail === 'string' ? { thumbnail: body.thumbnail } : {}),
-    ...(isMediaType(body.type) ? { mediaType: body.type } : {}),
+    ...(mediaType ? { mediaType } : {}),
   };
 }
 
