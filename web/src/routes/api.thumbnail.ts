@@ -6,6 +6,10 @@ const MAX_CONCURRENT_FETCHES = 12
 const MAX_REDIRECTS = 3
 let activeFetches = 0
 
+async function discard(response: Response) {
+  try { await response.body?.cancel() } catch { /* Upstream rejection is already authoritative. */ }
+}
+
 async function fetchImage(remoteUrl: string) {
   let current = remoteUrl
   for (let redirect = 0; redirect <= MAX_REDIRECTS; redirect += 1) {
@@ -20,15 +24,25 @@ async function fetchImage(remoteUrl: string) {
     })
     if (response.status >= 300 && response.status < 400) {
       const location = response.headers.get('location')
+      await discard(response)
       if (!location || redirect === MAX_REDIRECTS) return null
       current = new URL(location, current).toString()
       continue
     }
-    if (!response.ok) return null
+    if (!response.ok) {
+      await discard(response)
+      return null
+    }
     const contentType = response.headers.get('content-type')?.split(';')[0].trim().toLowerCase()
-    if (!contentType) return null
+    if (!contentType || !['image/avif', 'image/gif', 'image/jpeg', 'image/jpg', 'image/png', 'image/webp'].includes(contentType)) {
+      await discard(response)
+      return null
+    }
     const declaredLength = Number(response.headers.get('content-length') ?? 0)
-    if (declaredLength > MAX_BYTES) return null
+    if (declaredLength > MAX_BYTES) {
+      await discard(response)
+      return null
+    }
     const bytes = await readBoundedStream(response.body, MAX_BYTES)
     if (!bytes || !isRasterImage(contentType, bytes)) return null
     return { bytes, contentType }
@@ -55,10 +69,11 @@ export const Route = createFileRoute('/api/thumbnail')({
         try {
           const image = await fetchImage(remoteUrl)
           if (!image) return Response.json({ error: 'Thumbnail unavailable' }, { status: 502 })
+          const remainingSeconds = Math.max(0, Math.floor((expires - Date.now()) / 1000))
           return new Response(image.bytes, {
             headers: {
               'Access-Control-Allow-Origin': '*',
-              'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+              'Cache-Control': `public, max-age=${remainingSeconds}, immutable`,
               'Content-Length': String(image.bytes.byteLength),
               'Content-Type': image.contentType,
               'X-Content-Type-Options': 'nosniff',
